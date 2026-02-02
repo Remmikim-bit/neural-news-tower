@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bloomberg-bg: #0a0a0a;
+  --color-bloomberg-neon: #00f2ff;
+  --color-bloomberg-success: #00ff41;
+  --color-bloomberg-danger: #ff0033;
+  --color-bloomberg-glass: rgba(255, 255, 255, 0.05);
+  --color-bloomberg-border: rgba(255, 255, 255, 0.1);
+
+  --font-sans: 'Inter', 'Pretendard', sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-bloomberg-bg text-white font-sans antialiased overflow-hidden selection:bg-bloomberg-neon selection:text-black;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-bloomberg-glass backdrop-blur-md border border-bloomberg-border shadow-2xl;
+  }
+
+  .neon-text {
+    @apply text-bloomberg-neon;
+    filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.6));
+  }
+
+  .neon-border {
+    @apply border border-bloomberg-neon;
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
