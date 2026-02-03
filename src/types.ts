@@ -243,6 +243,11 @@ export interface EventPhase {
     contentMarkdown: string;
     relatedArticles: string[]; // Article IDs
     importance: number; // 1-5
+    perspectives?: ArticlePerspective[]; // 언론사별 시각
+    biasStatistics?: {
+        averageScore: number;
+        label: string; // "중립", "보수적", "진보적" 등
+    };
 }
 
 // ============================================================================

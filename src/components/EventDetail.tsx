@@ -1,7 +1,34 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Clock, Share2, Bookmark, CheckCircle2, ChevronRight, MessageSquare } from 'lucide-react';
+import { ChevronLeft, Clock, Share2, Bookmark, CheckCircle2, ChevronRight, MessageSquare, BarChart2 } from 'lucide-react';
 import type { EventPhase } from '../types';
 import { mockEvents } from '../data/mockEvents';
+
+const BiasMeter = ({ score, label }: { score: number, label: string }) => {
+    return (
+        <div className="w-full">
+            <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase mb-1 tracking-wider">
+                <span>진보 (Left)</span>
+                <span>중립 (Center)</span>
+                <span>보수 (Right)</span>
+            </div>
+            <div className="relative h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-200 via-gray-100 to-red-200 opacity-50 dark:opacity-20"></div>
+                <div
+                    className={`absolute top-0 bottom-0 w-1 transition-all duration-500 ease-out ${score < 40 ? 'bg-blue-600' : score > 60 ? 'bg-red-600' : 'bg-gray-600'}`}
+                    style={{ left: `${score}%` }}
+                ></div>
+            </div>
+            <div className="flex justify-between items-center mt-2">
+                <span className="text-xs font-serif font-bold text-slate-700 dark:text-slate-300">
+                    Score: {score}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold">
+                    {label}
+                </span>
+            </div>
+        </div>
+    );
+};
 
 interface EventDetailProps {
     eventId: string;
@@ -172,6 +199,37 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => {
                             ))}
                         </div>
                     </div>
+
+                    {activePhase.biasStatistics && (
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+                            <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase mb-4 tracking-wider flex items-center gap-2">
+                                <BarChart2 size={16} /> 편향성 분석
+                            </h3>
+                            <BiasMeter score={activePhase.biasStatistics.averageScore} label={activePhase.biasStatistics.label} />
+                        </div>
+                    )}
+
+                    {activePhase.perspectives && activePhase.perspectives.length > 0 && (
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+                            <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase mb-2 tracking-wider flex items-center gap-2">
+                                <MessageSquare size={16} /> 언론사별 관점
+                            </h3>
+                            {activePhase.perspectives.map((p, idx) => (
+                                <div key={idx} className="bg-slate-50 dark:bg-white/5 p-3 rounded-lg border border-slate-100 dark:border-white/5 hover:border-blue-500/30 transition-colors">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <span className="font-bold text-xs text-slate-800 dark:text-slate-200">{p.source}</span>
+                                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${p.bias < 40 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                                p.bias > 60 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                                                    'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                                            }`}>{p.opinion}</span>
+                                    </div>
+                                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-snug">
+                                        {p.summary}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     <div className="bg-blue-600 rounded-2xl p-6 text-white shadow-xl shadow-blue-500/20">
                         <div className="flex items-center gap-2 mb-4">

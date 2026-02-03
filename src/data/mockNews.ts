@@ -15,6 +15,7 @@ export const MOCK_NEWS: NewsArticle[] = [
         summary: "G7 정상회의에서 AI 안전 협약이 만장일치로 통과되었다. 국내 반도체 및 플랫폼 기업들의 규제 대응 비용 증가가 예상된다.",
         category: ArticleCategory.TECH,
         source: "The Daily Insight",
+        eventId: "ev-ai-regulation-2024",
         bias: 45,
         timestamp: "2024-03-15T14:30:00Z",
         readingTime: 5,

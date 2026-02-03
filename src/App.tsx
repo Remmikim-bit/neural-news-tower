@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Menu, Search, X, ChevronRight, Share2, Printer,
-  Bookmark, Globe, BarChart2, TrendingUp, Clock, AlertCircle,
-  ArrowDownNarrowWide as SortDesc, Sun, Moon, ExternalLink
+  Menu, Search, X, ChevronRight, Share2, TrendingUp, Clock,
+  ArrowDownNarrowWide as SortDesc, Sun, Moon
 } from 'lucide-react';
-import type { NewsArticle, ArticlePerspective } from './types.ts';
+import type { NewsArticle } from './types.ts';
 import { ArticleCategory, SortOption } from './types.ts';
 import { MOCK_NEWS, TREND_KEYWORDS } from './data/mockNews.ts';
 import EntityGraphView from './components/EntityGraphView';
 import EventDetail from './components/EventDetail';
 
-type ViewType = 'feed' | 'reader' | 'event' | 'graph';
+type ViewType = 'feed' | 'event' | 'graph';
 
 /**
  * ==============================================================================
@@ -432,225 +431,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategoryS
   </header>
 );
 
-// Article Reader
-interface ArticleReaderProps {
-  article: NewsArticle;
-  onBack: () => void;
-  isBookmarked: boolean;
-  onToggleBookmark: () => void;
-}
-
-const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onBack, isBookmarked, onToggleBookmark }) => {
-  const [showCopyNotification, setShowCopyNotification] = useState(false);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [article.id]);
-
-  const handleShare = async () => {
-    const url = window.location.href;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: article.title,
-          text: article.summary,
-          url: url,
-        });
-      } catch (err) {
-        console.log('Share cancelled');
-      }
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(url);
-      setShowCopyNotification(true);
-      setTimeout(() => setShowCopyNotification(false), 2000);
-    }
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 bg-white dark:bg-slate-900 min-h-screen pb-20">
-      {/* Copy notification */}
-      {showCopyNotification && (
-        <div className="fixed top-20 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50 animate-in fade-in slide-in-from-top-2">
-          {TEXT.linkCopied}
-        </div>
-      )}
-
-      {/* Sticky Top Bar */}
-      <div className="sticky top-16 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex justify-between items-center">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-500">
-          <X size={16} /> {TEXT.backToList}
-        </button>
-        <div className="flex gap-3 text-gray-400">
-          <button
-            onClick={onToggleBookmark}
-            className={`cursor - pointer transition - colors ${isBookmarked ? 'text-blue-600' : 'hover:text-black dark:hover:text-white'} `}
-            title={TEXT.bookmark}
-          >
-            <Bookmark size={18} className={isBookmarked ? 'fill-current' : ''} />
-          </button>
-          <button onClick={handleShare} className="cursor-pointer hover:text-black dark:hover:text-white" title={TEXT.share}>
-            <Share2 size={18} />
-          </button>
-          <button onClick={handlePrint} className="cursor-pointer hover:text-black dark:hover:text-white" title={TEXT.print}>
-            <Printer size={18} />
-          </button>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Main Content */}
-        <article className="lg:col-span-8">
-          <div className="mb-6">
-            <span className="text-blue-700 font-bold text-xs tracking-wider uppercase mb-2 block">{article.category}</span>
-            <h1 className={`text - 3xl md: text - 4xl font - bold text - slate - 900 dark: text - white leading - tight mb - 4 ${CONFIG.theme.fontSerif} `}>
-              {article.title}
-            </h1>
-            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6 pb-6 border-b border-gray-100 dark:border-gray-800">
-              <span className="font-bold text-gray-900 dark:text-white">{article.source}</span>
-              <span>•</span>
-              <Clock size={14} />
-              <span>{article.timestamp}</span>
-              <span className="ml-auto flex items-center gap-1 text-green-600 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded text-xs font-bold">
-                <AlertCircle size={12} /> {TEXT.sourceCheck}
-              </span>
-            </div>
-
-            {article.imageUrl && (
-              <figure className="mb-8">
-                <img src={article.imageUrl} alt="News Thumbnail" className="w-full h-64 object-cover rounded shadow-sm" />
-                <figcaption className="text-xs text-gray-400 mt-2 text-right">Image Source: Unsplash / Editorial</figcaption>
-              </figure>
-            )}
-
-            <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-lg border-l-4 border-slate-900 dark:border-blue-700 mb-8">
-              <h3 className="font-bold text-slate-900 dark:text-white mb-2 text-sm uppercase tracking-wide">AI Summary</h3>
-              <p className={`text - gray - 700 dark: text - gray - 300 leading - relaxed ${CONFIG.theme.fontSerif} `}>{article.summary}</p>
-            </div>
-
-            <MarkdownViewer content={article.contentMarkdown} />
-
-            {article.perspectives && article.perspectives.length > 0 && (
-              <PerspectiveView perspectives={article.perspectives} />
-            )}
-          </div>
-        </article>
-
-        {/* Sidebar */}
-        <aside className="lg:col-span-4 space-y-8">
-          {/* Bias Analysis */}
-          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
-              <BarChart2 size={16} className="text-blue-700" />
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase">{TEXT.biasScore}</h3>
-            </div>
-            <BiasMeter score={article.bias} />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 leading-snug">
-              이 기사는 {article.bias > 60 ? TEXT.biasRight : article.bias < 40 ? TEXT.biasLeft : TEXT.biasCenter} 성향의 어휘를 주로 사용하고 있습니다.
-            </p>
-          </div>
-
-          {/* Geo Map */}
-          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
-              <Globe size={16} className="text-blue-700" />
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase">{TEXT.mapLabel}</h3>
-            </div>
-            <WorldMap highlights={article.relatedCountries} />
-          </div>
-
-          {/* Entity Network */}
-          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
-              <Share2 size={16} className="text-blue-700" />
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase">{TEXT.networkLabel}</h3>
-            </div>
-            <EntityNetworkBlock />
-          </div>
-        </aside>
-      </div>
-    </div>
-  );
-};
-
-// Perspective View
-interface PerspectiveViewProps {
-  perspectives: ArticlePerspective[];
-}
-
-const PerspectiveView: React.FC<PerspectiveViewProps> = ({ perspectives }) => {
-  const [activePerspective, setActivePerspective] = useState(0);
-
-  return (
-    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm mt-12 transition-all">
-      <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-700 pb-3">
-        <Globe size={16} className="text-blue-700" />
-        <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase">{TEXT.perspectives}</h3>
-      </div>
-
-      <div className="flex space-x-4 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-        {perspectives.map((p, idx) => (
-          <button
-            key={idx}
-            onClick={() => setActivePerspective(idx)}
-            className={`flex - shrink - 0 px - 4 py - 2 rounded - full text - sm font - semibold transition - all ${activePerspective === idx
-              ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600'
-              } `}
-          >
-            {p.source}
-          </button>
-        ))}
-      </div>
-
-      {perspectives.length > 0 && (
-        <div className="bg-gray-50 dark:bg-slate-700/50 p-6 rounded-xl border border-gray-100 dark:border-gray-600">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em] mb-1 block">
-                {perspectives[activePerspective].opinion}
-              </span>
-              <h4 className="font-bold text-slate-900 dark:text-white text-xl">{perspectives[activePerspective].source}</h4>
-            </div>
-            <a
-              href={perspectives[activePerspective].link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors shadow-sm"
-              title="원문 보기"
-            >
-              <ExternalLink size={18} />
-            </a>
-          </div>
-          <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6 text-lg">
-            {perspectives[activePerspective].summary}
-          </p>
-          <div className="flex items-center gap-4 py-4 border-t border-gray-200 dark:border-gray-600">
-            <div className="flex-1">
-              <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase mb-2">
-                <span>Objectivity</span>
-                <span>{100 - perspectives[activePerspective].bias}%</span>
-              </div>
-              <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className={`h - full rounded - full transition - all duration - 1000 ${perspectives[activePerspective].bias > 60 ? 'bg-red-500' : perspectives[activePerspective].bias < 40 ? 'bg-blue-500' : 'bg-gray-400'} `}
-                  style={{ width: `${perspectives[activePerspective].bias}% ` }}
-                ></div>
-              </div>
-            </div>
-            <div className="bg-white dark:bg-slate-800 px-3 py-1 rounded border border-gray-100 dark:border-gray-600 shadow-sm">
-              <span className="text-[10px] font-black text-slate-500 dark:text-gray-400 uppercase">Bias: {perspectives[activePerspective].bias}%</span>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
 
 // News Feed
 interface NewsFeedProps {
@@ -660,33 +440,66 @@ interface NewsFeedProps {
   sortBy: SortOption;
   onSortChange: (sort: SortOption) => void;
   onSelectEvent: (eventId: string) => void;
-  onViewGraph: () => void;
+
 }
 
-const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendClick, sortBy, onSortChange, onSelectEvent, onViewGraph }) => {
+const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendClick, sortBy, onSortChange, onSelectEvent }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* Left Sidebar */}
       <div className="hidden lg:block lg:col-span-3 space-y-6">
-        <div className="bg-blue-700 text-white p-6 rounded-xl shadow-lg mb-6 group cursor-pointer hover:bg-blue-800 transition-all" onClick={() => onSelectEvent('ev-sewol-2014')}>
-          <div className="flex items-center gap-2 mb-2 text-[10px] font-black uppercase tracking-widest">
-            <Clock size={12} /> Featured Event
-          </div>
-          <h3 className="text-lg font-serif font-bold mb-2 group-hover:translate-x-1 transition-transform">세월호 참사 타임라인</h3>
-          <p className="text-xs text-blue-100 mb-4 line-clamp-2">AI가 재구성한 참사의 전 과정과 리비전 형식의 타임라인을 확인하세요.</p>
-          <div className="flex items-center text-[10px] font-bold uppercase">
-            View Timeline <ChevronRight size={10} className="ml-1" />
-          </div>
-        </div>
+        {/* Recently Updated Events */}
+        <div className="space-y-4">
+          <h3 className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest px-1">
+            Recently Updated
+          </h3>
 
-        <div className="bg-slate-900 text-white p-6 rounded-xl shadow-lg mb-6 group cursor-pointer hover:bg-black transition-all" onClick={onViewGraph}>
-          <div className="flex items-center gap-2 mb-2 text-[10px] font-black uppercase tracking-widest text-blue-400">
-            <Share2 size={12} /> Interactive Graph
+          {/* Mock Event 1 */}
+          <div className="bg-[#1e1e1e] border border-white/5 p-5 rounded-xl shadow-lg cursor-pointer hover:border-blue-500/50 transition-all group" onClick={() => onSelectEvent('ev-sewol-2014')}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="bg-red-500/20 text-red-400 text-[10px] font-bold px-2 py-0.5 rounded border border-red-500/30">
+                BREAKING
+              </span>
+              <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                <Clock size={10} /> 10m ago
+              </span>
+            </div>
+            <h4 className="text-white font-bold mb-2 leading-snug group-hover:text-blue-400 transition-colors">
+              세월호 참사: 진상규명 보고서 공개 및 새로운 증거 발견
+            </h4>
+            <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden mb-3">
+              <div className="bg-blue-500 w-3/4 h-full"></div>
+            </div>
+            <div className="flex items-center justify-between text-[10px] text-slate-400">
+              <span>Phase 3/4</span>
+              <span className="flex items-center gap-1 group-hover:text-white transition-colors">
+                View Timeline <ChevronRight size={10} />
+              </span>
+            </div>
           </div>
-          <h3 className="text-lg font-serif font-bold mb-2 group-hover:translate-x-1 transition-transform">인물 관계 네트워크</h3>
-          <p className="text-xs text-slate-400 mb-4">뉴스 속 인물들과 조직들의 연결 고리를 그래프 뷰로 탐색하세요.</p>
-          <div className="flex items-center text-[10px] font-bold uppercase text-blue-400">
-            Open Graph View <ChevronRight size={10} className="ml-1" />
+
+          {/* Mock Event 2 */}
+          <div className="bg-[#1e1e1e] border border-white/5 p-5 rounded-xl shadow-lg cursor-pointer hover:border-blue-500/50 transition-all group">
+            <div className="flex items-center justify-between mb-3">
+              <span className="bg-blue-500/20 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-500/30">
+                ONGOING
+              </span>
+              <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                <Clock size={10} /> 2h ago
+              </span>
+            </div>
+            <h4 className="text-white font-bold mb-2 leading-snug group-hover:text-blue-400 transition-colors">
+              2026 지방선거: 서울시장 후보 토론회 생중계 요약
+            </h4>
+            <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden mb-3">
+              <div className="bg-blue-500 w-1/2 h-full"></div>
+            </div>
+            <div className="flex items-center justify-between text-[10px] text-slate-400">
+              <span>Phase 2/5</span>
+              <span className="flex items-center gap-1 group-hover:text-white transition-colors">
+                View Timeline <ChevronRight size={10} />
+              </span>
+            </div>
           </div>
         </div>
 
@@ -800,7 +613,6 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
 
 export default function App() {
   const [view, setView] = useState<ViewType>('feed');
-  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -826,25 +638,6 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<ArticleCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>(SortOption.IMPACT);
-  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
-
-  // Load bookmarks from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('neural-news-bookmarks');
-    if (saved) {
-      setBookmarks(new Set(JSON.parse(saved)));
-    }
-  }, []);
-
-  // Save bookmarks to localStorage
-  useEffect(() => {
-    localStorage.setItem('neural-news-bookmarks', JSON.stringify(Array.from(bookmarks)));
-  }, [bookmarks]);
-
-  // Scroll to top when article changes
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [selectedArticle]);
 
   // Filter and sort articles
   const filteredArticles = useMemo(() => {
@@ -887,20 +680,9 @@ export default function App() {
   const handleTrendClick = (keyword: string) => {
     setSearchQuery(keyword);
     setView('feed');
-    setSelectedArticle(null);
+
   };
 
-  const handleToggleBookmark = (articleId: string) => {
-    setBookmarks((prev: Set<string>) => {
-      const newBookmarks = new Set(prev);
-      if (newBookmarks.has(articleId)) {
-        newBookmarks.delete(articleId);
-      } else {
-        newBookmarks.add(articleId);
-      }
-      return newBookmarks;
-    });
-  };
 
   return (
     <div className={`min-h-screen bg-[#0f1115] text-slate-100 selection:bg-blue-900/30 overflow-x-hidden transition-colors duration-300 ${CONFIG.theme.fontSans}`}>
@@ -922,11 +704,11 @@ export default function App() {
 
       {/* Global Ticker */}
       <BreakingTicker items={[
-        "KOSPI 2,680.50 ▲ 1.2%",
-        "USD/KRW 1,310.00 ▼ 5.50",
-        "BREAKING: AI 안전 정상회의 공동 성명 채택",
-        "WEATHER: 서울 18°C, 맑음",
-        "TOP STORY: 저출산 대책 예산 40조원 투입 확정"
+        "2026 지방선거: 서울시장 후보 토론회 생중계 중",
+        "삼성전자, 3nm 공정 수율 85% 달성 공식 발표",
+        "국회, 'AI 기본법' 본회의 통과... 세계 최초 포괄적 규제",
+        "한국형 달 탐사선 다누리 2호, 궤도 진입 성공",
+        "속보: 수도권 광역급행철도(GTX-B) 전 구간 개통식"
       ]} />
 
       {/* Navigation Header */}
@@ -935,7 +717,7 @@ export default function App() {
         onSearchClick={() => setSearchModalOpen(true)}
         onCategorySelect={setActiveCategory}
         onLogoClick={() => {
-          setSelectedArticle(null);
+
           setActiveCategory(null);
           setSearchQuery('');
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -959,21 +741,17 @@ export default function App() {
           />
         )}
 
-        {view === 'reader' && selectedArticle && (
-          <ArticleReader
-            article={selectedArticle}
-            onBack={() => setView('feed')}
-            isBookmarked={bookmarks.has(selectedArticle.id)}
-            onToggleBookmark={() => handleToggleBookmark(selectedArticle.id)}
-          />
-        )}
-
         {view === 'feed' && (
           <NewsFeed
             articles={filteredArticles}
             onSelectArticle={(art) => {
-              setSelectedArticle(art);
-              setView('reader');
+              if (art.eventId) {
+                setSelectedEventId(art.eventId);
+                setView('event');
+                window.scrollTo(0, 0);
+              } else {
+                console.log("No event linked to article:", art.id);
+              }
             }}
             onTrendClick={handleTrendClick}
             sortBy={sortBy}
@@ -982,7 +760,6 @@ export default function App() {
               setSelectedEventId(eventId);
               setView('event');
             }}
-            onViewGraph={() => setView('graph')}
           />
         )}
       </main>

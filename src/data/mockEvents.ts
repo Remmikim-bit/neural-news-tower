@@ -32,7 +32,15 @@ export const mockEvents: NewsEvent[] = [
 현장은 조류가 강해 수중 수색이 지연되었으며, 해경의 초기 대응 미숙이 도마 위에 올랐습니다.
         `,
                 relatedArticles: ['art-001', 'art-002'],
-                importance: 5
+                importance: 5,
+                perspectives: [
+                    { source: "KBS", sourceId: "kbs", opinion: "사실 전달", summary: "정부 공식 브리핑 위주의 속보 전달", link: "#", bias: 50 },
+                    { source: "뉴스타파", sourceId: "newstapa", opinion: "현장 밀착", summary: "현장의 혼란과 구조 지연 상황 생중계", link: "#", bias: 20 }
+                ],
+                biasStatistics: {
+                    averageScore: 35,
+                    label: "현장 중심"
+                }
             },
             {
                 id: 'phase-2-response',
@@ -52,7 +60,15 @@ export const mockEvents: NewsEvent[] = [
 정부의 실종자 명단 관리 부실과 늑장 대응에 대한 비판이 고조되었습니다.
         `,
                 relatedArticles: ['art-003', 'art-004'],
-                importance: 4
+                importance: 4,
+                perspectives: [
+                    { source: "조선일보", sourceId: "chosun", opinion: "신중론", summary: "다이빙벨 투입의 실효성에 의문 제기", link: "#", bias: 70 },
+                    { source: "한겨레", sourceId: "hani", opinion: "비판적", summary: "정부의 통제와 구조 실패에 대한 강력한 비판", link: "#", bias: 30 }
+                ],
+                biasStatistics: {
+                    averageScore: 50,
+                    label: "의견 양분"
+                }
             },
             {
                 id: 'phase-3-investigation',
@@ -72,7 +88,44 @@ export const mockEvents: NewsEvent[] = [
 정치권의 충돌 속에서도 유가족들은 거리에서 진실 규명을 외쳤습니다.
         `,
                 relatedArticles: ['art-005'],
-                importance: 4
+                importance: 4,
+                perspectives: [
+                    { source: "JTBC", sourceId: "jtbc", opinion: "적극적", summary: "진상규명의 필요성 및 새로운 증거 보도에 집중", link: "#", bias: 35 },
+                    { source: "동아일보", sourceId: "donga", opinion: "비판적", summary: "조사위 활동의 정치적 편향성 문제 제기", link: "#", bias: 75 }
+                ],
+                biasStatistics: {
+                    averageScore: 55,
+                    label: "논쟁적"
+                }
+            }
+        ]
+    },
+    {
+        id: 'ev-ai-regulation-2024',
+        title: '글로벌 AI 규제 협약',
+        description: '2024년 G7 정상회의를 기점으로 시작된 전 세계적인 AI 규제 흐름',
+        summary: '유럽연합의 AI 법안 통과부터 G7 서울-파리 선언까지, AI의 안전한 개발을 위한 국제 사회의 노력과 갈등.',
+        imageUrl: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop',
+        category: ArticleCategory.TECH,
+        status: 'ONGOING',
+        startDate: '2024-03-15',
+        relatedEntities: ['OpenAI', 'Google', 'EU', 'UN'],
+        tags: ['AI', '규제', '국제협약'],
+        phases: [
+            {
+                id: 'phase-1-agreement',
+                eventId: 'ev-ai-regulation-2024',
+                date: '2024-03-15',
+                title: 'G7 서울-파리 선언 채택',
+                description: 'G7 정상들의 만장일치로 AI 안전 협약 통과',
+                contentMarkdown: `### 만장일치 합의\n전 세계 주요국 정상들이 AI 안전을 위한 첫 걸음을 내딛었습니다.\n\n**핵심 내용:**\n- 투명성 확보\n- 워터마크 의무화`,
+                relatedArticles: ['1'],
+                importance: 5,
+                perspectives: [
+                    { source: "TechCrunch", sourceId: "tc", opinion: "환영", summary: "필요한 안전장치 마련", link: "#", bias: 40 },
+                    { source: "VentureBeat", sourceId: "vb", opinion: "우려", summary: "혁신 저해 가능성", link: "#", bias: 60 }
+                ],
+                biasStatistics: { averageScore: 50, label: "중립적" }
             }
         ]
     }
