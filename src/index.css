@@ -1,22 +1,37 @@
 @import "tailwindcss";
 
-/* Tailwind v4에서 .dark 클래스를 인식하도록 설정 */
+/* Tailwind v4 다크모드 설정 */
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-bloomberg-bg: #0a0a0a;
-  --color-bloomberg-neon: #00f2ff;
-  --color-bloomberg-success: #00ff41;
-  --color-bloomberg-danger: #ff0033;
-  --color-bloomberg-glass: rgba(255, 255, 255, 0.05);
-  --color-bloomberg-border: rgba(255, 255, 255, 0.1);
+  /* 기존 'bloomberg' 변수명을 유지하되, 값을 정갈한 톤으로 변경합니다. */
+
+  /* 배경: 칠흑 같은 검정 대신 깊은 잉크색 (Zinc-950) */
+  --color-bloomberg-bg: #09090b;
+
+  /* 포인트: 눈이 시린 형광색 대신 신뢰감 있는 블루 (Blue-500) */
+  --color-bloomberg-neon: #3b82f6;
+
+  /* 성공/경고: 채도를 낮추어 눈의 피로 감소 */
+  --color-bloomberg-success: #10b981;
+  --color-bloomberg-danger: #ef4444;
+
+  /* 유리 효과: 투명도를 낮추고 노이즈를 줄여 더 단단한 느낌 */
+  --color-bloomberg-glass: rgba(24, 24, 27, 0.6);
+  --color-bloomberg-border: rgba(255, 255, 255, 0.08);
 
   --font-sans: 'Inter', 'Pretendard', sans-serif;
 }
 
 @layer base {
   body {
-    @apply bg-[#f8f9fa] text-slate-900 font-sans antialiased selection:bg-blue-100 transition-colors duration-300 dark:bg-[#0f1115] dark:text-slate-100;
+    /* 라이트 모드 */
+    @apply bg-[#f8f9fa] text-slate-900 font-sans antialiased selection:bg-blue-100 transition-colors duration-300;
+  }
+
+  /* 다크 모드: AI틱한 남색(#0f1115) 제거 -> 고급스러운 Zinc 다크 그레이(#09090b) 적용 */
+  .dark body {
+    @apply bg-[#09090b] text-zinc-200 selection:bg-blue-900/50 selection:text-white;
   }
 }
 
@@ -39,24 +54,26 @@
     }
   }
 
+  /* Glass Panel: 사이버펑크 느낌의 광택 제거 -> 매트하고 투명한 재질감 */
   .glass-panel {
-    @apply bg-bloomberg-glass backdrop-blur-md border border-bloomberg-border shadow-2xl;
+    @apply bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm;
   }
 
-  /* Additional glass panel variant for dark mode */
   .dark .glass-panel {
-    @apply bg-white/5 border-white/10;
+    @apply bg-[#18181b]/80 border-white/5 shadow-none;
   }
 }
 
+/* 네온 효과 제거: 빛 번짐(Glow)을 없애고 선명한 텍스트로 변경 */
 .neon-text {
   @apply text-bloomberg-neon;
-  filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.6));
+  filter: none;
 }
 
+/* 네온 테두리 제거: 발광 효과 없이 깔끔한 라인으로 변경 */
 .neon-border {
-  @apply border border-bloomberg-neon;
-  box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+  @apply border border-bloomberg-border;
+  box-shadow: none;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
