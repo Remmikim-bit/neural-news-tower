@@ -3,7 +3,7 @@ import {
   Menu, Search, X, ChevronRight, Share2, TrendingUp, Clock,
   ArrowDownNarrowWide as SortDesc, Sun, Moon
 } from 'lucide-react';
-import type { NewsArticle } from './types.ts';
+import type { NewsArticle, TrendKeyword } from './types.ts';
 import { ArticleCategory, SortOption } from './types.ts';
 import { MOCK_NEWS, TREND_KEYWORDS } from './data/mockNews.ts';
 import EntityGraphView from './components/EntityGraphView';
@@ -114,8 +114,8 @@ const CATEGORY_MAP: Record<string, ArticleCategory> = {
  * ==============================================================================
  */
 
-// Bias Meter
-const BiasMeter = ({ score }: { score: number }) => {
+// Bias Meter (exported for use in EventDetail)
+export const BiasMeter = ({ score }: { score: number }) => {
   return (
     <div className="w-full">
       <div className="flex justify-between text-[10px] text-gray-500 font-bold uppercase mb-1 tracking-wider">
@@ -137,8 +137,8 @@ const BiasMeter = ({ score }: { score: number }) => {
   );
 };
 
-// Markdown Viewer
-const MarkdownViewer = ({ content }: { content: string }) => {
+// Markdown Viewer (exported for use in EventDetail)
+export const MarkdownViewer = ({ content }: { content: string }) => {
   const renderLine = (line: string, index: number) => {
     if (line.startsWith('### ')) return <h3 key={index} className="text-xl font-bold mt-6 mb-3 text-slate-900 font-serif">{line.replace('### ', '')}</h3>;
     if (line.startsWith('#### ')) return <h4 key={index} className="text-lg font-bold mt-4 mb-2 text-slate-800 font-serif">{line.replace('#### ', '')}</h4>;
@@ -166,8 +166,8 @@ const MarkdownViewer = ({ content }: { content: string }) => {
   );
 };
 
-// World Map
-const WorldMap = ({ highlights }: { highlights: string[] }) => {
+// World Map (exported for use in EventDetail)
+export const WorldMap = ({ highlights }: { highlights: string[] }) => {
   const getFill = (code: string) => highlights.includes(code) ? "#3b82f6" : "#e5e7eb";
 
   return (
@@ -192,8 +192,8 @@ const WorldMap = ({ highlights }: { highlights: string[] }) => {
   );
 };
 
-// Entity Network Placeholder
-const EntityNetworkBlock = () => {
+// Entity Network Placeholder (exported for use in EventDetail)
+export const EntityNetworkBlock = () => {
   return (
     <div className="w-full h-64 bg-slate-50 border border-slate-200 rounded flex items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 grid grid-cols-6 grid-rows-6 opacity-10">
@@ -230,13 +230,13 @@ const EntityNetworkBlock = () => {
 // Breaking Ticker
 const BreakingTicker: React.FC<{ items: string[] }> = ({ items }) => (
   <div className="bg-slate-900 text-white py-2 overflow-hidden border-b border-slate-800 relative">
-    <div className="max-w-7xl mx-auto px-4 flex items-center">
-      <div className="flex-shrink-0 bg-red-600 text-[10px] font-black px-2 py-0.5 rounded mr-4 z-10">
-        BREAKING
-      </div>
+    <div className="max-w-7xl mx-auto px-4">
       <div className="flex whitespace-nowrap animate-marquee group">
         {[...items, ...items].map((item, idx) => (
-          <span key={idx} className="text-xs font-medium tracking-tight mx-8 flex items-center">
+          <span key={idx} className="text-xs font-medium tracking-tight mx-12 flex items-center">
+            <span className="bg-red-600 text-[10px] font-black px-2 py-0.5 rounded mr-3">
+              BREAKING
+            </span>
             <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
             {item}
           </span>
@@ -360,8 +360,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategorySelect, onLogoClick, onThemeToggle, onViewGraph, isDarkMode, activeCategory }) => (
   <header className="border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 transition-colors duration-300">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center h-16">
-        <div className="flex items-center">
+      <div className="flex items-center h-16 relative">
+        <div className="flex items-center gap-2">
           <button onClick={onMenuClick} className="p-2 -ml-2 text-gray-400 hover:text-black lg:hidden dark:text-gray-500 dark:hover:text-white transition-colors">
             <Menu size={24} />
           </button>
@@ -370,14 +370,14 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategoryS
           </button>
         </div>
 
-        <div className="text-center cursor-pointer group" onClick={onLogoClick}>
-          <h1 className={`text - 2xl md: text - 3xl font - black tracking - tight text - slate - 900 dark: text - white group - hover: text - blue - 800 dark: group - hover: text - blue - 400 transition - colors ${CONFIG.theme.fontSerif} `}>
+        <div className="absolute left-1/2 -translate-x-1/2 text-center cursor-pointer group" onClick={onLogoClick}>
+          <h1 className={`text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-blue-800 dark:group-hover:text-blue-400 transition-colors ${CONFIG.theme.fontSerif}`}>
             {TEXT.siteTitle}
           </h1>
           <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 dark:text-gray-400 mt-1">{TEXT.siteSubtitle}</p>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-4">
           <button
             onClick={onThemeToggle}
             className="p-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors"
@@ -391,12 +391,12 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategoryS
           >
             <Share2 size={20} />
           </button>
-          <div className="hidden md:flex gap-2 text-xs font-bold text-gray-500">
-            <span className="cursor-pointer hover:text-black">KR</span>
-            <span className="w-[1px] bg-gray-300 h-3 self-center"></span>
-            <span className="cursor-pointer hover:text-black">EN</span>
+          <div className="hidden md:flex gap-2 text-xs font-bold text-gray-500 dark:text-gray-400">
+            <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors">KR</span>
+            <span className="w-[1px] bg-gray-300 dark:bg-gray-600 h-3 self-center"></span>
+            <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors">EN</span>
           </div>
-          <button className="bg-slate-900 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-slate-800 transition-colors">
+          <button className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-3 py-1.5 rounded text-xs font-bold hover:bg-slate-800 dark:hover:bg-gray-200 transition-colors">
             Subscribe
           </button>
         </div>
@@ -405,10 +405,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategoryS
       <nav className="max-w-7xl mx-auto px-4 overflow-x-auto scrollbar-hide py-3">
         <div className="flex justify-center md:gap-8 gap-4 min-w-max">
           <span
-            className={`text - [11px] font - black uppercase tracking - widest cursor - pointer transition - all duration - 200 py - 1 border - b - 2 ${activeCategory === null
-              ? 'text-blue-700 border-blue-700'
+            className={`text-[11px] font-black uppercase tracking-widest cursor-pointer transition-all duration-200 py-1 border-b-2 hover:scale-105 active:scale-95 ${activeCategory === null
+              ? 'text-blue-700 dark:text-blue-400 border-blue-700 dark:border-blue-400'
               : 'text-gray-400 border-transparent hover:text-black dark:hover:text-white hover:border-gray-200 dark:hover:border-slate-700'
-              } `}
+              }`}
             onClick={() => onCategorySelect(null)}
           >
             {TEXT.allCategories}
@@ -416,10 +416,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategoryS
           {TEXT.nav.map((item, idx) => (
             <span
               key={idx}
-              className={`text - [11px] font - black uppercase tracking - widest cursor - pointer transition - all duration - 200 py - 1 border - b - 2 ${activeCategory === CATEGORY_MAP[item]
-                ? 'text-blue-700 border-blue-700'
+              className={`text-[11px] font-black uppercase tracking-widest cursor-pointer transition-all duration-200 py-1 border-b-2 hover:scale-105 active:scale-95 ${activeCategory === CATEGORY_MAP[item]
+                ? 'text-blue-700 dark:text-blue-400 border-blue-700 dark:border-blue-400'
                 : 'text-gray-400 border-transparent hover:text-black dark:hover:text-white hover:border-gray-200 dark:hover:border-slate-700'
-                } `}
+                }`}
               onClick={() => onCategorySelect(CATEGORY_MAP[item])}
             >
               {item}
@@ -440,10 +440,10 @@ interface NewsFeedProps {
   sortBy: SortOption;
   onSortChange: (sort: SortOption) => void;
   onSelectEvent: (eventId: string) => void;
-
+  trendData: TrendKeyword[];
 }
 
-const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendClick, sortBy, onSortChange, onSelectEvent }) => {
+const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendClick, sortBy, onSortChange, onSelectEvent, trendData }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* Left Sidebar */}
@@ -467,11 +467,8 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
             <h4 className="text-white font-bold mb-2 leading-snug group-hover:text-blue-400 transition-colors">
               세월호 참사: 진상규명 보고서 공개 및 새로운 증거 발견
             </h4>
-            <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden mb-3">
-              <div className="bg-blue-500 w-3/4 h-full"></div>
-            </div>
-            <div className="flex items-center justify-between text-[10px] text-slate-400">
-              <span>Phase 3/4</span>
+            <div className="flex items-center justify-between text-[10px] text-slate-400 mt-3">
+              <span>관련 기사 12건</span>
               <span className="flex items-center gap-1 group-hover:text-white transition-colors">
                 View Timeline <ChevronRight size={10} />
               </span>
@@ -491,11 +488,8 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
             <h4 className="text-white font-bold mb-2 leading-snug group-hover:text-blue-400 transition-colors">
               2026 지방선거: 서울시장 후보 토론회 생중계 요약
             </h4>
-            <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden mb-3">
-              <div className="bg-blue-500 w-1/2 h-full"></div>
-            </div>
-            <div className="flex items-center justify-between text-[10px] text-slate-400">
-              <span>Phase 2/5</span>
+            <div className="flex items-center justify-between text-[10px] text-slate-400 mt-3">
+              <span>관련 기사 8건</span>
               <span className="flex items-center gap-1 group-hover:text-white transition-colors">
                 View Timeline <ChevronRight size={10} />
               </span>
@@ -509,16 +503,16 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
             <h3 className="font-bold text-slate-900 dark:text-white">{TEXT.trendKeyword}</h3>
           </div>
           <ul className="space-y-3">
-            {TREND_KEYWORDS.map((item, idx) => (
+            {trendData.map((item, idx) => (
               <li
                 key={idx}
-                className="flex items-center justify-between text-sm group cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 p-1 rounded"
+                className="flex items-center justify-between text-sm group cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 p-1 rounded transition-all"
                 onClick={() => onTrendClick(item.text)}
               >
                 <span className="font-bold text-gray-400 w-6">0{item.rank}</span>
                 <span className="flex-1 font-medium text-gray-700 group-hover:text-black dark:text-gray-300 dark:group-hover:text-white">{item.text}</span>
-                <span className={`text - [10px] px - 1.5 rounded ${item.change === 'up' ? 'text-red-600 bg-red-50 dark:bg-red-900/30' : item.change === 'down' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/30' : 'text-gray-400 bg-gray-100 dark:bg-slate-700'} `}>
-                  {item.change === 'up' ? '▲' : item.change === 'down' ? '▼' : '-'}
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${item.changeAmount && item.changeAmount > 0 ? 'text-red-600 bg-red-50 dark:bg-red-900/30' : item.changeAmount && item.changeAmount < 0 ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/30' : 'text-gray-400 bg-gray-100 dark:bg-slate-700'}`}>
+                  {item.changeAmount && item.changeAmount > 0 ? `+${item.changeAmount}` : item.changeAmount && item.changeAmount < 0 ? item.changeAmount : '—'}
                 </span>
               </li>
             ))}
@@ -638,6 +632,35 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<ArticleCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>(SortOption.IMPACT);
+  const [trendData, setTrendData] = useState(TREND_KEYWORDS);
+
+  // Browser history integration for back button
+  useEffect(() => {
+    const handlePopState = () => {
+      if (view !== 'feed') {
+        setView('feed');
+        setSelectedEventId(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [view]);
+
+  // Trending keywords auto-refresh every 15 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTrendData(prev => prev.map(item => {
+        const change = Math.floor(Math.random() * 7) - 3; // -3 to +3
+        return {
+          ...item,
+          changeAmount: change,
+          change: change > 0 ? 'up' as const : change < 0 ? 'down' as const : 'same' as const
+        };
+      }));
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Filter and sort articles
   const filteredArticles = useMemo(() => {
@@ -685,7 +708,7 @@ export default function App() {
 
 
   return (
-    <div className={`min-h-screen bg-[#0f1115] text-slate-100 selection:bg-blue-900/30 overflow-x-hidden transition-colors duration-300 ${CONFIG.theme.fontSans}`}>
+    <div className={`min-h-screen bg-white dark:bg-[#09090b] text-slate-900 dark:text-slate-100 selection:bg-blue-100 dark:selection:bg-blue-900/30 overflow-x-hidden transition-colors duration-300 ${CONFIG.theme.fontSans}`}>
       {/* Modals */}
       <SearchModal
         isOpen={searchModalOpen}
@@ -744,10 +767,12 @@ export default function App() {
         {view === 'feed' && (
           <NewsFeed
             articles={filteredArticles}
+            trendData={trendData}
             onSelectArticle={(art) => {
               if (art.eventId) {
                 setSelectedEventId(art.eventId);
                 setView('event');
+                window.history.pushState({ view: 'event', eventId: art.eventId }, '');
                 window.scrollTo(0, 0);
               } else {
                 console.log("No event linked to article:", art.id);
@@ -759,26 +784,27 @@ export default function App() {
             onSelectEvent={(eventId: string) => {
               setSelectedEventId(eventId);
               setView('event');
+              window.history.pushState({ view: 'event', eventId }, '');
             }}
           />
         )}
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-12 py-12">
+      <footer className="bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 mt-12 py-12 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className={`text - 2xl font - bold font - serif mb - 4`}>{TEXT.siteTitle}</h2>
-          <p className="text-sm text-gray-500 mb-6">
+          <h2 className="text-2xl font-bold font-serif mb-4 text-slate-900 dark:text-white">{TEXT.siteTitle}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             Providing unbiased intelligence for the modern era.<br />
             Neural News uses advanced AI to analyze political bias in real-time.
           </p>
           <div className="flex justify-center gap-6 text-sm font-bold text-gray-400">
-            <a href="#" className="hover:text-black">About Us</a>
-            <a href="#" className="hover:text-black">Methodology</a>
-            <a href="#" className="hover:text-black">Privacy Policy</a>
-            <a href="#" className="hover:text-black">Contact</a>
+            <a href="#" className="hover:text-black dark:hover:text-white transition-colors">About Us</a>
+            <a href="#" className="hover:text-black dark:hover:text-white transition-colors">Methodology</a>
+            <a href="#" className="hover:text-black dark:hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-black dark:hover:text-white transition-colors">Contact</a>
           </div>
-          <div className="mt-8 text-xs text-gray-300 font-mono">
+          <div className="mt-8 text-xs text-gray-300 dark:text-gray-600 font-mono">
             © 2024 NEURAL NEWS. ALL RIGHTS RESERVED.
           </div>
         </div>

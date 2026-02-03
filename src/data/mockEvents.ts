@@ -1,5 +1,5 @@
 import { ArticleCategory } from '../types';
-import type { NewsEvent, EventPhase } from '../types';
+import type { NewsEvent } from '../types';
 
 export const mockEvents: NewsEvent[] = [
     {

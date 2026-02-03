@@ -352,6 +352,7 @@ export interface TrendKeyword {
     rank: number;
     text: string;
     change: 'up' | 'down' | 'same';
+    changeAmount?: number; // Numeric change for display (+3, -2, etc.)
     count?: number;
     relatedArticles?: string[];
 }

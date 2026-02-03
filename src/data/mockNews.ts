@@ -612,14 +612,14 @@ OpenAI 내부 소식통에 따르면, GPT-5는 현재 베타 테스트 단계에
 ];
 
 export const TREND_KEYWORDS: TrendKeyword[] = [
-    { rank: 1, text: "AI 법안 통과", change: "up", count: 15234 },
-    { rank: 2, text: "엔비디아 실적", change: "same", count: 12890 },
-    { rank: 3, text: "총선 여론조사", change: "up", count: 11456 },
-    { rank: 4, text: "비트코인 반감기", change: "down", count: 9823 },
-    { rank: 5, text: "의대 증원", change: "up", count: 8765 },
-    { rank: 6, text: "테슬라 리콜", change: "down", count: 7654 },
-    { rank: 7, text: "출산율 위기", change: "up", count: 6543 },
-    { rank: 8, text: "최저임금 인상", change: "same", count: 5432 },
+    { rank: 1, text: "AI 법안 통과", change: "up", changeAmount: 3, count: 15234 },
+    { rank: 2, text: "엔비디아 실적", change: "same", changeAmount: 0, count: 12890 },
+    { rank: 3, text: "총선 여론조사", change: "up", changeAmount: 2, count: 11456 },
+    { rank: 4, text: "비트코인 반감기", change: "down", changeAmount: -1, count: 9823 },
+    { rank: 5, text: "의대 증원", change: "up", changeAmount: 4, count: 8765 },
+    { rank: 6, text: "테슬라 리콜", change: "down", changeAmount: -2, count: 7654 },
+    { rank: 7, text: "출산율 위기", change: "up", changeAmount: 1, count: 6543 },
+    { rank: 8, text: "최저임금 인상", change: "same", changeAmount: 0, count: 5432 },
 ];
 
 // Category metadata for UI
