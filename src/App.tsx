@@ -1,50 +1,66 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Menu, Search, User, ChevronRight, Share2, Printer,
-  Bookmark, X, Globe, BarChart2, TrendingUp, Clock, AlertCircle
+  Menu, Search, X, ChevronRight, Share2, Printer,
+  Bookmark, Globe, BarChart2, TrendingUp, Clock, AlertCircle,
+  Filter, SortDesc, BookmarkCheck
 } from 'lucide-react';
+import { NewsArticle, ArticleCategory, TrendKeyword, SortOption } from './types';
+import { MOCK_NEWS, TREND_KEYWORDS, CATEGORY_META } from './data/mockNews';
 
 /**
  * ==============================================================================
- * [System Configuration] 
- * 확장성을 위한 언어 설정 및 상수 정의 (Legacy Style Config)
+ * [System Configuration]
  * ==============================================================================
  */
 
 const CONFIG = {
-  currentLang: 'ko', // 'ko' | 'en' | 'es'
+  currentLang: 'ko',
   theme: {
-    fontSerif: 'font-serif', // 명조 계열 (Times 느낌)
-    fontSans: 'font-sans',   // 고딕 계열 (UI 요소)
+    fontSerif: 'font-serif',
+    fontSans: 'font-sans',
   }
 };
 
-// 다국어 지원을 위한 라벨 딕셔너리
 const LABELS = {
   ko: {
     siteTitle: "NEURAL NEWS",
     siteSubtitle: "Veritas Vincit",
-    nav: ["정치", "경제", "기술", "세계", "오피니언"],
+    nav: ["정치", "경제", "기술", "세계", "오피니언", "과학", "문화", "환경"],
     biasScore: "미디어 편향 지수",
     trendKeyword: "실시간 트렌드",
     tickerLabel: "속보",
-    readMore: "분석 리포트 읽기",
     sourceCheck: "출처 검증됨",
-    mapLabel: "관련 지역 (Geospatial Context)",
-    networkLabel: "엔티티 관계도 (Entity Network)",
+    mapLabel: "관련 지역",
+    networkLabel: "엔티티 관계도",
     biasLeft: "진보 성향",
     biasRight: "보수 성향",
     biasCenter: "중립",
     backToList: "목록으로 돌아가기",
+    search: "검색",
+    searchPlaceholder: "뉴스 검색...",
+    close: "닫기",
+    bookmark: "북마크",
+    share: "공유",
+    print: "인쇄",
+    subscribe: "구독하기",
+    subscribeEmail: "이메일 주소",
+    joinNow: "가입하기",
+    filter: "필터",
+    sort: "정렬",
+    allCategories: "전체",
+    sortByImpact: "영향력순",
+    sortByDate: "최신순",
+    sortByPopularity: "인기순",
+    bookmarked: "북마크됨",
+    linkCopied: "링크가 복사되었습니다",
   },
   en: {
     siteTitle: "NEURAL NEWS",
     siteSubtitle: "Veritas Vincit",
-    nav: ["Politics", "Economy", "Tech", "World", "Opinion"],
+    nav: ["Politics", "Economy", "Tech", "World", "Opinion", "Science", "Culture", "Environment"],
     biasScore: "Media Bias Index",
     trendKeyword: "Trending Now",
     tickerLabel: "BREAKING",
-    readMore: "Read Analysis",
     sourceCheck: "Verified Sources",
     mapLabel: "Geospatial Context",
     networkLabel: "Entity Network",
@@ -52,115 +68,48 @@ const LABELS = {
     biasRight: "Right Leaning",
     biasCenter: "Center",
     backToList: "Back to Feed",
+    search: "Search",
+    searchPlaceholder: "Search news...",
+    close: "Close",
+    bookmark: "Bookmark",
+    share: "Share",
+    print: "Print",
+    subscribe: "Subscribe",
+    subscribeEmail: "Email address",
+    joinNow: "JOIN NOW",
+    filter: "Filter",
+    sort: "Sort",
+    allCategories: "All",
+    sortByImpact: "Impact",
+    sortByDate: "Latest",
+    sortByPopularity: "Popular",
+    bookmarked: "Bookmarked",
+    linkCopied: "Link copied",
   }
 };
 
 const TEXT = LABELS[CONFIG.currentLang as keyof typeof LABELS];
 
-/**
- * ==============================================================================
- * [Mock Data] 
- * 실제 DB 연동 전 사용할 더미 데이터 (Markdown 포함)
- * ==============================================================================
- */
-
-interface NewsArticle {
-  id: string;
-  title: string;
-  summary: string;
-  contentMarkdown: string; // 마크다운 형식의 본문
-  category: string;
-  source: string;
-  bias: number; // 0(Left) ~ 100(Right)
-  timestamp: string;
-  relatedCountries: string[]; // 국가 코드 (ISO 2자리)
-  entities: string[]; // 네트워크 그래프용 엔티티
-  imageUrl?: string;
-}
-
-const MOCK_NEWS: NewsArticle[] = [
-  {
-    id: '1',
-    title: "글로벌 AI 규제 합의안 도출, 한국 기업에 미칠 영향은?",
-    summary: "G7 정상회의에서 AI 안전 협약이 만장일치로 통과되었다. 국내 반도체 및 플랫폼 기업들의 규제 대응 비용 증가가 예상된다.",
-    category: "TECH",
-    source: "The Daily Insight",
-    bias: 45, // 약간 진보/중립
-    timestamp: "2024-03-15 14:30",
-    relatedCountries: ['KR', 'US', 'EU'],
-    entities: ['Sam Altman', 'Ministry of Science', 'Samsung'],
-    imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop",
-    contentMarkdown: `
-### 역사적인 합의, 그러나 과제는 남았다
-G7 정상들은 어제 파리에서 열린 회의에서 **'AI 서울-파리 선언'**을 채택했다. 이 선언은 고성능 AI 모델의 개발을 투명하게 공개하고, 위험성 평가를 의무화하는 것을 골자로 한다.
-
-#### 주요 쟁점
-1. **투명성 의무화**: 학습 데이터의 출처를 명기해야 함.
-2. **워터마킹**: AI 생성 콘텐츠에 식별 표지 의무화.
-3. **벌금 부과**: 위반 시 매출의 최대 7% 벌금.
-
-전문가들은 이번 규제가 한국의 **네이버(Naver)**나 **삼성전자** 같은 기업들에게 단기적인 비용 부담으로 작용할 수 있다고 경고했다. "혁신을 저해할 수 있다"는 우려와 "안전장치가 필수적이다"라는 의견이 팽팽히 맞서고 있다.
-    `
-  },
-  {
-    id: '2',
-    title: "미 연준, 금리 인하 시기 '신중론' 재확인... 시장 실망감",
-    summary: "파월 의장의 발언 이후 나스닥은 1.2% 하락 마감했다. 물가 상승 압력이 여전히 존재한다는 판단이다.",
-    category: "ECONOMY",
-    source: "Market Watcher",
-    bias: 75, // 보수 성향
-    timestamp: "2024-03-15 11:00",
-    relatedCountries: ['US'],
-    entities: ['Jerome Powell', 'Federal Reserve', 'Wall Street'],
-    imageUrl: "https://images.unsplash.com/photo-1611974765270-ca1258634369?q=80&w=1000&auto=format&fit=crop",
-    contentMarkdown: `
-### 시장의 기대는 시기상조였나
-연방준비제도(Fed) 의장은 오늘 기자회견에서 "인플레이션이 2% 목표치로 수렴한다는 확신이 들 때까지 금리 인하를 서두르지 않겠다"고 밝혔다.
-
-* **나스닥**: -1.2%
-* **S&P 500**: -0.8%
-* **국채 금리**: 상승세 전환
-
-경제 전문가들은 "고용 지표가 여전히 강력하기 때문에 연준이 굳이 부양책을 쓸 이유가 없다"고 분석했다. 이는 보수적인 통화 정책을 지지하는 진영의 논리와 일치한다.
-    `
-  },
-  {
-    id: '3',
-    title: "중동 정세 불안정 심화, 유가 90달러 돌파 위기",
-    summary: "호르무즈 해협의 긴장감이 고조되면서 국제 유가가 급등하고 있다. 에너지 수급 대책이 시급하다.",
-    category: "WORLD",
-    source: "Global Times",
-    bias: 20, // 진보 성향 (혹은 반전/평화 강조)
-    timestamp: "2024-03-15 09:15",
-    relatedCountries: ['IR', 'SA', 'US'],
-    entities: ['OPEC', 'UN Security Council'],
-    contentMarkdown: `
-### 에너지 안보 비상
-중동 지역의 지정학적 리스크가 해소될 기미를 보이지 않고 있다. 어제 발생한 유조선 나포 시도 사건은 해당 해역의 안전에 심각한 우려를 제기했다.
-
-국제 에너지 기구(IEA)는 "공급망 충격이 현실화될 경우, 전 세계적인 인플레이션 재발이 불가피하다"고 경고했다. 각국 정부는 비상 비축유 방출을 검토 중이다.
-    `
-  }
-];
-
-const TREND_KEYWORDS = [
-  { rank: 1, text: "AI 법안 통과", change: "up" },
-  { rank: 2, text: "엔비디아 실적", change: "same" },
-  { rank: 3, text: "총선 여론조사", change: "up" },
-  { rank: 4, text: "비트코인 반감기", change: "down" },
-  { rank: 5, text: "의대 증원", change: "up" },
-];
+// Category mapping
+const CATEGORY_MAP: Record<string, ArticleCategory> = {
+  "정치": ArticleCategory.POLITICS,
+  "경제": ArticleCategory.ECONOMY,
+  "기술": ArticleCategory.TECH,
+  "세계": ArticleCategory.WORLD,
+  "오피니언": ArticleCategory.OPINION,
+  "과학": ArticleCategory.SCIENCE,
+  "문화": ArticleCategory.CULTURE,
+  "환경": ArticleCategory.ENVIRONMENT,
+};
 
 /**
  * ==============================================================================
- * [Helper Components] 
- * 시각화 및 유틸리티 컴포넌트
+ * [Helper Components]
  * ==============================================================================
  */
 
-// 1. Bias Indicator (Bar Type - More standard journalism style)
+// Bias Meter
 const BiasMeter = ({ score }: { score: number }) => {
-  // 0(Left) ~ 50(Center) ~ 100(Right)
   return (
     <div className="w-full">
       <div className="flex justify-between text-[10px] text-gray-500 font-bold uppercase mb-1 tracking-wider">
@@ -169,9 +118,7 @@ const BiasMeter = ({ score }: { score: number }) => {
         <span>{TEXT.biasRight}</span>
       </div>
       <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
-        {/* Background Gradients */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-200 via-gray-100 to-red-200 opacity-50"></div>
-        {/* Indicator */}
         <div
           className={`absolute top-0 bottom-0 w-1 transition-all duration-500 ease-out ${score < 40 ? 'bg-blue-600' : score > 60 ? 'bg-red-600' : 'bg-gray-600'}`}
           style={{ left: `${score}%` }}
@@ -184,9 +131,8 @@ const BiasMeter = ({ score }: { score: number }) => {
   );
 };
 
-// 2. Simple Markdown Renderer (Safe, no external lib)
+// Markdown Viewer
 const MarkdownViewer = ({ content }: { content: string }) => {
-  // 매우 간단한 파서: ### -> h3, #### -> h4, ** -> bold, * list -> li
   const renderLine = (line: string, index: number) => {
     if (line.startsWith('### ')) return <h3 key={index} className="text-xl font-bold mt-6 mb-3 text-slate-900 font-serif">{line.replace('### ', '')}</h3>;
     if (line.startsWith('#### ')) return <h4 key={index} className="text-lg font-bold mt-4 mb-2 text-slate-800 font-serif">{line.replace('#### ', '')}</h4>;
@@ -194,7 +140,6 @@ const MarkdownViewer = ({ content }: { content: string }) => {
     if (line.trim().startsWith('1. ')) return <li key={index} className="ml-4 list-decimal text-gray-700 my-1">{line.replace(/^\d+\. /, '')}</li>;
     if (line.trim() === '') return <br key={index} />;
 
-    // Bold 처리
     const parts = line.split(/(\*\*.*?\*\*)/g);
     return (
       <p key={index} className="mb-4 text-gray-700 leading-relaxed text-base md:text-lg">
@@ -215,37 +160,20 @@ const MarkdownViewer = ({ content }: { content: string }) => {
   );
 };
 
-// 3. Vector World Map (Simple SVG)
+// World Map
 const WorldMap = ({ highlights }: { highlights: string[] }) => {
-  // 간단한 대륙/국가 패스 데이터 (매우 단순화됨)
-  // 실제 프로덕션에서는 topojson 등을 사용해야 하지만, 단일 파일 제약상 SVG Path로 대체
-  const getFill = (code: string) => highlights.includes(code) ? "#3b82f6" : "#e5e7eb"; // Highlight: Blue, Default: Gray
+  const getFill = (code: string) => highlights.includes(code) ? "#3b82f6" : "#e5e7eb";
 
   return (
     <div className="w-full aspect-[2/1] bg-blue-50/30 rounded border border-gray-100 relative overflow-hidden">
       <svg viewBox="0 0 800 400" className="w-full h-full">
-        {/* Ocean */}
         <rect width="800" height="400" fill="transparent" />
-
-        {/* North America (US/CA) - Simplified */}
         <path d="M 50 50 L 250 50 L 200 150 L 100 120 Z" fill={getFill('US')} stroke="white" strokeWidth="1" />
-
-        {/* South America */}
         <path d="M 180 160 L 280 160 L 250 350 L 180 250 Z" fill={getFill('BR')} stroke="white" strokeWidth="1" />
-
-        {/* Europe */}
         <path d="M 380 60 L 500 60 L 480 120 L 380 120 Z" fill={getFill('EU')} stroke="white" strokeWidth="1" />
-
-        {/* Asia (CN/KR/JP) */}
         <path d="M 510 60 L 700 60 L 720 150 L 550 180 Z" fill={getFill('KR')} stroke="white" strokeWidth="1" />
-
-        {/* Middle East (IR/SA) */}
         <path d="M 450 130 L 530 130 L 520 180 L 460 170 Z" fill={getFill('IR')} stroke="white" strokeWidth="1" />
-
-        {/* Africa */}
         <path d="M 380 140 L 480 140 L 450 300 L 390 250 Z" fill={getFill('ZA')} stroke="white" strokeWidth="1" />
-
-        {/* Labels (If highlighted) */}
         {highlights.includes('US') && <text x="150" y="100" fontSize="12" fill="black" fontWeight="bold">USA</text>}
         {highlights.includes('KR') && <text x="620" y="110" fontSize="12" fill="black" fontWeight="bold">KOREA</text>}
         {highlights.includes('EU') && <text x="430" y="90" fontSize="12" fill="black" fontWeight="bold">EUROPE</text>}
@@ -258,15 +186,13 @@ const WorldMap = ({ highlights }: { highlights: string[] }) => {
   );
 };
 
-// 4. Entity Network Placeholder (Legacy Block)
+// Entity Network Placeholder
 const EntityNetworkBlock = () => {
   return (
     <div className="w-full h-64 bg-slate-50 border border-slate-200 rounded flex items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 grid grid-cols-6 grid-rows-6 opacity-10">
-        {/* Grid pattern background */}
         {[...Array(36)].map((_, i) => <div key={i} className="border border-slate-300"></div>)}
       </div>
-
       <div className="text-center z-10 p-4">
         <div className="inline-block p-3 rounded-full bg-slate-200 mb-3 text-slate-500">
           <Share2 size={24} />
@@ -275,8 +201,6 @@ const EntityNetworkBlock = () => {
         <p className="text-xs text-slate-500 max-w-xs mx-auto mb-2">
           인물, 조직, 사건 간의 관계도를 시각화하는 모듈입니다.
         </p>
-
-        {/* Developer Comment Block */}
         <div className="text-[10px] font-mono text-left bg-gray-800 text-green-400 p-2 rounded w-full max-w-sm mx-auto mt-2">
           <code>
             // TODO: Implement Force-Directed Graph<br />
@@ -293,12 +217,11 @@ const EntityNetworkBlock = () => {
 
 /**
  * ==============================================================================
- * [Page Components] 
- * 주요 화면 구성 요소
+ * [Page Components]
  * ==============================================================================
  */
 
-// Top Ticker
+// Breaking Ticker
 const BreakingTicker = () => {
   return (
     <div className="bg-slate-900 text-white text-xs font-bold py-2 px-4 flex items-center overflow-hidden">
@@ -315,18 +238,126 @@ const BreakingTicker = () => {
   );
 };
 
-// Main Header
-const Header = () => (
+// Search Modal
+interface SearchModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSearch: (query: string) => void;
+}
+
+const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSearch }) => {
+  const [query, setQuery] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(query);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-slate-900">{TEXT.search}</h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-black">
+              <X size={24} />
+            </button>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={TEXT.searchPlaceholder}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+              autoFocus
+            />
+          </form>
+          <div className="mt-4 text-sm text-gray-500">
+            <p>팁: 키워드, 카테고리, 출처 등으로 검색할 수 있습니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Mobile Menu
+interface MobileMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onCategorySelect: (category: ArticleCategory | null) => void;
+  activeCategory: ArticleCategory | null;
+}
+
+const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onCategorySelect, activeCategory }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose}>
+      <div
+        className="bg-white w-80 h-full shadow-2xl animate-in slide-in-from-left duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold font-serif">{TEXT.siteTitle}</h2>
+            <button onClick={onClose} className="text-gray-400 hover:text-black">
+              <X size={24} />
+            </button>
+          </div>
+          <nav className="space-y-2">
+            <button
+              onClick={() => { onCategorySelect(null); onClose(); }}
+              className={`w-full text-left px-4 py-3 rounded font-bold transition-colors ${activeCategory === null ? 'bg-blue-700 text-white' : 'text-gray-700 hover:bg-gray-100'
+                }`}
+            >
+              {TEXT.allCategories}
+            </button>
+            {TEXT.nav.map((item, idx) => {
+              const category = CATEGORY_MAP[item];
+              return (
+                <button
+                  key={idx}
+                  onClick={() => { onCategorySelect(category); onClose(); }}
+                  className={`w-full text-left px-4 py-3 rounded font-bold transition-colors ${activeCategory === category ? 'bg-blue-700 text-white' : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                >
+                  {item}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Header
+interface HeaderProps {
+  onMenuClick: () => void;
+  onSearchClick: () => void;
+  onCategorySelect: (category: ArticleCategory | null) => void;
+  activeCategory: ArticleCategory | null;
+}
+
+const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategorySelect, activeCategory }) => (
   <header className="border-b border-gray-200 bg-white sticky top-0 z-40">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center h-16">
-        {/* Left: Menu & Search */}
         <div className="flex items-center gap-4">
-          <button className="text-gray-500 hover:text-black"><Menu size={20} /></button>
-          <button className="text-gray-500 hover:text-black"><Search size={20} /></button>
+          <button onClick={onMenuClick} className="text-gray-500 hover:text-black lg:hidden">
+            <Menu size={20} />
+          </button>
+          <button onClick={onSearchClick} className="text-gray-500 hover:text-black">
+            <Search size={20} />
+          </button>
         </div>
 
-        {/* Center: Logo */}
         <div className="text-center">
           <h1 className={`text-2xl md:text-3xl font-black tracking-tight text-slate-900 ${CONFIG.theme.fontSerif}`}>
             {TEXT.siteTitle}
@@ -334,7 +365,6 @@ const Header = () => (
           <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 mt-1">{TEXT.siteSubtitle}</p>
         </div>
 
-        {/* Right: User & Utils */}
         <div className="flex items-center gap-4">
           <div className="hidden md:flex gap-2 text-xs font-bold text-gray-500">
             <span className="cursor-pointer hover:text-black">KR</span>
@@ -347,37 +377,100 @@ const Header = () => (
         </div>
       </div>
 
-      {/* Navigation (Desktop) */}
-      <nav className="hidden md:flex justify-center py-3 space-x-8 text-sm font-bold text-gray-600 border-t border-gray-100 mt-2">
-        {TEXT.nav.map((item) => (
-          <a key={item} href="#" className="hover:text-blue-700 transition-colors border-b-2 border-transparent hover:border-blue-700 pb-1">
-            {item}
-          </a>
-        ))}
+      <nav className="hidden lg:flex justify-center py-3 space-x-8 text-sm font-bold text-gray-600 border-t border-gray-100 mt-2">
+        <button
+          onClick={() => onCategorySelect(null)}
+          className={`hover:text-blue-700 transition-colors border-b-2 pb-1 ${activeCategory === null ? 'border-blue-700 text-blue-700' : 'border-transparent'
+            }`}
+        >
+          {TEXT.allCategories}
+        </button>
+        {TEXT.nav.map((item, idx) => {
+          const category = CATEGORY_MAP[item];
+          return (
+            <button
+              key={idx}
+              onClick={() => onCategorySelect(category)}
+              className={`hover:text-blue-700 transition-colors border-b-2 pb-1 ${activeCategory === category ? 'border-blue-700 text-blue-700' : 'border-transparent'
+                }`}
+            >
+              {item}
+            </button>
+          );
+        })}
       </nav>
     </div>
   </header>
 );
 
-// Article Detail View
-const ArticleReader = ({ article, onBack }: { article: NewsArticle, onBack: () => void }) => {
+// Article Reader
+interface ArticleReaderProps {
+  article: NewsArticle;
+  onBack: () => void;
+  isBookmarked: boolean;
+  onToggleBookmark: () => void;
+}
+
+const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onBack, isBookmarked, onToggleBookmark }) => {
+  const [showCopyNotification, setShowCopyNotification] = useState(false);
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: article.title,
+          text: article.summary,
+          url: url,
+        });
+      } catch (err) {
+        console.log('Share cancelled');
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(url);
+      setShowCopyNotification(true);
+      setTimeout(() => setShowCopyNotification(false), 2000);
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 bg-white min-h-screen pb-20">
-      {/* Sticky Top Bar for Reader */}
+      {/* Copy notification */}
+      {showCopyNotification && (
+        <div className="fixed top-20 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50 animate-in fade-in slide-in-from-top-2">
+          {TEXT.linkCopied}
+        </div>
+      )}
+
+      {/* Sticky Top Bar */}
       <div className="sticky top-16 z-30 bg-white/95 backdrop-blur border-b border-gray-200 px-4 py-3 flex justify-between items-center">
         <button onClick={onBack} className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-blue-700">
           <X size={16} /> {TEXT.backToList}
         </button>
         <div className="flex gap-3 text-gray-400">
-          <Bookmark size={18} className="cursor-pointer hover:text-black" />
-          <Share2 size={18} className="cursor-pointer hover:text-black" />
-          <Printer size={18} className="cursor-pointer hover:text-black" />
+          <button
+            onClick={onToggleBookmark}
+            className={`cursor-pointer transition-colors ${isBookmarked ? 'text-blue-600' : 'hover:text-black'}`}
+            title={TEXT.bookmark}
+          >
+            {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+          </button>
+          <button onClick={handleShare} className="cursor-pointer hover:text-black" title={TEXT.share}>
+            <Share2 size={18} />
+          </button>
+          <button onClick={handlePrint} className="cursor-pointer hover:text-black" title={TEXT.print}>
+            <Printer size={18} />
+          </button>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
-
-        {/* Main Content (Left/Center) */}
+        {/* Main Content */}
         <article className="lg:col-span-8">
           <div className="mb-6">
             <span className="text-blue-700 font-bold text-xs tracking-wider uppercase mb-2 block">{article.category}</span>
@@ -410,7 +503,7 @@ const ArticleReader = ({ article, onBack }: { article: NewsArticle, onBack: () =
           </div>
         </article>
 
-        {/* Sidebar (Visualizations) */}
+        {/* Sidebar */}
         <aside className="lg:col-span-4 space-y-8">
           {/* Bias Analysis */}
           <div className="bg-white border border-gray-200 rounded p-5 shadow-sm">
@@ -442,18 +535,24 @@ const ArticleReader = ({ article, onBack }: { article: NewsArticle, onBack: () =
             <EntityNetworkBlock />
           </div>
         </aside>
-
       </div>
     </div>
   );
 };
 
-// Main Feed View
-const NewsFeed = ({ onSelectArticle }: { onSelectArticle: (article: NewsArticle) => void }) => {
+// News Feed
+interface NewsFeedProps {
+  articles: NewsArticle[];
+  onSelectArticle: (article: NewsArticle) => void;
+  onTrendClick: (keyword: string) => void;
+  sortBy: SortOption;
+  onSortChange: (sort: SortOption) => void;
+}
+
+const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendClick, sortBy, onSortChange }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-      {/* Left Sidebar: Trends & Stats */}
+      {/* Left Sidebar */}
       <div className="hidden lg:block lg:col-span-3 space-y-6">
         <div className="bg-white border border-gray-200 rounded p-4">
           <div className="flex items-center gap-2 mb-4">
@@ -462,7 +561,11 @@ const NewsFeed = ({ onSelectArticle }: { onSelectArticle: (article: NewsArticle)
           </div>
           <ul className="space-y-3">
             {TREND_KEYWORDS.map((item, idx) => (
-              <li key={idx} className="flex items-center justify-between text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded">
+              <li
+                key={idx}
+                className="flex items-center justify-between text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded"
+                onClick={() => onTrendClick(item.text)}
+              >
                 <span className="font-bold text-gray-400 w-6">0{item.rank}</span>
                 <span className="flex-1 font-medium text-gray-700 group-hover:text-black">{item.text}</span>
                 <span className={`text-[10px] px-1.5 rounded ${item.change === 'up' ? 'text-red-600 bg-red-50' : item.change === 'down' ? 'text-blue-600 bg-blue-50' : 'text-gray-400 bg-gray-100'}`}>
@@ -485,30 +588,41 @@ const NewsFeed = ({ onSelectArticle }: { onSelectArticle: (article: NewsArticle)
       <div className="lg:col-span-9 space-y-6">
         <div className="flex items-center justify-between border-b border-slate-900 pb-2 mb-4">
           <h2 className="text-xl font-bold font-serif text-slate-900">Top Stories</h2>
-          <div className="text-xs font-bold text-gray-500">Sorted by: Impact</div>
+          <div className="flex items-center gap-2">
+            <SortDesc size={16} className="text-gray-500" />
+            <select
+              value={sortBy}
+              onChange={(e) => onSortChange(e.target.value as SortOption)}
+              className="text-xs font-bold text-gray-700 border border-gray-300 rounded px-2 py-1 cursor-pointer hover:border-gray-400"
+            >
+              <option value={SortOption.IMPACT}>{TEXT.sortByImpact}</option>
+              <option value={SortOption.DATE}>{TEXT.sortByDate}</option>
+              <option value={SortOption.POPULARITY}>{TEXT.sortByPopularity}</option>
+            </select>
+          </div>
         </div>
 
-        {/* Hero Card (First Item) */}
-        {MOCK_NEWS.length > 0 && (
+        {/* Hero Card */}
+        {articles.length > 0 && (
           <div
-            onClick={() => onSelectArticle(MOCK_NEWS[0])}
+            onClick={() => onSelectArticle(articles[0])}
             className="group cursor-pointer grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-white"
           >
             <div className="overflow-hidden rounded border border-gray-200 aspect-video md:aspect-auto">
-              <img src={MOCK_NEWS[0].imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Headline" />
+              <img src={articles[0].imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Headline" />
             </div>
             <div className="flex flex-col justify-center">
-              <span className="text-blue-600 font-bold text-xs mb-2 tracking-wide">{MOCK_NEWS[0].category}</span>
+              <span className="text-blue-600 font-bold text-xs mb-2 tracking-wide">{articles[0].category}</span>
               <h2 className={`text-2xl md:text-3xl font-bold text-slate-900 mb-3 group-hover:text-blue-800 transition-colors ${CONFIG.theme.fontSerif}`}>
-                {MOCK_NEWS[0].title}
+                {articles[0].title}
               </h2>
               <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
-                {MOCK_NEWS[0].summary}
+                {articles[0].summary}
               </p>
               <div className="mt-auto flex items-center text-xs text-gray-400 font-bold">
-                <span>{MOCK_NEWS[0].source}</span>
+                <span>{articles[0].source}</span>
                 <span className="mx-2">•</span>
-                <span>{MOCK_NEWS[0].timestamp}</span>
+                <span>{articles[0].timestamp}</span>
               </div>
             </div>
           </div>
@@ -516,7 +630,7 @@ const NewsFeed = ({ onSelectArticle }: { onSelectArticle: (article: NewsArticle)
 
         {/* Standard List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {MOCK_NEWS.slice(1).map((article) => (
+          {articles.slice(1).map((article) => (
             <div
               key={article.id}
               onClick={() => onSelectArticle(article)}
@@ -524,7 +638,6 @@ const NewsFeed = ({ onSelectArticle }: { onSelectArticle: (article: NewsArticle)
             >
               <div className="flex items-start justify-between mb-3">
                 <span className="text-[10px] font-bold bg-gray-100 px-2 py-1 rounded text-gray-600">{article.category}</span>
-                <BiasMeter score={article.bias} />
               </div>
               <h3 className={`text-lg font-bold text-slate-900 mb-2 leading-snug group-hover:text-blue-700 ${CONFIG.theme.fontSerif}`}>
                 {article.title}
@@ -546,42 +659,144 @@ const NewsFeed = ({ onSelectArticle }: { onSelectArticle: (article: NewsArticle)
 
 /**
  * ==============================================================================
- * [Main Application Entry]
+ * [Main Application]
  * ==============================================================================
  */
 
 export default function App() {
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<ArticleCategory | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>(SortOption.IMPACT);
+  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
 
-  // Scroll to top when route changes
+  // Load bookmarks from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('neural-news-bookmarks');
+    if (saved) {
+      setBookmarks(new Set(JSON.parse(saved)));
+    }
+  }, []);
+
+  // Save bookmarks to localStorage
+  useEffect(() => {
+    localStorage.setItem('neural-news-bookmarks', JSON.stringify(Array.from(bookmarks)));
+  }, [bookmarks]);
+
+  // Scroll to top when article changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [selectedArticle]);
 
+  // Filter and sort articles
+  const filteredArticles = useMemo(() => {
+    let filtered = MOCK_NEWS;
+
+    // Filter by category
+    if (activeCategory) {
+      filtered = filtered.filter(article => article.category === activeCategory);
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(article =>
+        article.title.toLowerCase().includes(query) ||
+        article.summary.toLowerCase().includes(query) ||
+        article.tags?.some(tag => tag.toLowerCase().includes(query)) ||
+        article.source.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort
+    const sorted = [...filtered];
+    switch (sortBy) {
+      case SortOption.DATE:
+        sorted.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        break;
+      case SortOption.POPULARITY:
+        sorted.sort((a, b) => (b.stats?.views || 0) - (a.stats?.views || 0));
+        break;
+      case SortOption.IMPACT:
+      default:
+        sorted.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+        break;
+    }
+
+    return sorted;
+  }, [activeCategory, searchQuery, sortBy]);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setSelectedArticle(null);
+  };
+
+  const handleTrendClick = (keyword: string) => {
+    setSearchQuery(keyword);
+    setSelectedArticle(null);
+  };
+
+  const handleToggleBookmark = (articleId: string) => {
+    setBookmarks(prev => {
+      const newBookmarks = new Set(prev);
+      if (newBookmarks.has(articleId)) {
+        newBookmarks.delete(articleId);
+      } else {
+        newBookmarks.add(articleId);
+      }
+      return newBookmarks;
+    });
+  };
+
   return (
     <div className={`min-h-screen bg-[#f8f9fa] text-slate-900 ${CONFIG.theme.fontSans}`}>
+      {/* Modals */}
+      <SearchModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+        onSearch={handleSearch}
+      />
+      <MobileMenu
+        isOpen={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onCategorySelect={setActiveCategory}
+        activeCategory={activeCategory}
+      />
 
-      {/* 1. Global Ticker */}
+      {/* Global Ticker */}
       <BreakingTicker />
 
-      {/* 2. Navigation Header */}
-      <Header />
+      {/* Navigation Header */}
+      <Header
+        onMenuClick={() => setMenuOpen(true)}
+        onSearchClick={() => setSearchModalOpen(true)}
+        onCategorySelect={setActiveCategory}
+        activeCategory={activeCategory}
+      />
 
-      {/* 3. Main Content Router */}
+      {/* Main Content */}
       <main>
         {selectedArticle ? (
           <ArticleReader
             article={selectedArticle}
             onBack={() => setSelectedArticle(null)}
+            isBookmarked={bookmarks.has(selectedArticle.id)}
+            onToggleBookmark={() => handleToggleBookmark(selectedArticle.id)}
           />
         ) : (
           <NewsFeed
+            articles={filteredArticles}
             onSelectArticle={setSelectedArticle}
+            onTrendClick={handleTrendClick}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
           />
         )}
       </main>
 
-      {/* 4. Footer */}
+      {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-12 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h2 className={`text-2xl font-bold font-serif mb-4`}>{TEXT.siteTitle}</h2>
@@ -600,7 +815,6 @@ export default function App() {
           </div>
         </div>
       </footer>
-
     </div>
   );
 }
