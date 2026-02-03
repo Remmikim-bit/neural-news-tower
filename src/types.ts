@@ -64,6 +64,11 @@ export interface NewsArticle {
     // 관계성 (New)
     eventId?: string; // 소속된 사건 ID
     phaseId?: string; // 소속된 사건의 단계 ID
+    
+    // AI Metadata
+    hotness?: number; // 0-100 Hotness score
+    sourceUrl?: string; // Original URL for scraping
+    aiSummary?: string; // AI generated structured summary
 }
 
 export interface ArticlePerspective {
@@ -232,6 +237,10 @@ export interface NewsEvent {
     phases: EventPhase[];
     relatedEntities: string[]; // Entity IDs or names
     tags: string[];
+    
+    // AI Metadata
+    hotnessScore?: number; // Overall impact score
+    isNewEvent?: boolean; // If this was recently spawned
 }
 
 export interface EventPhase {

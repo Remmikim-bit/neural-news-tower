@@ -605,7 +605,10 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
  * ==============================================================================
  */
 
+import { useNews } from './hooks/useNews';
+
 export default function App() {
+  const { articles: liveArticles, loading: articlesLoading } = useNews();
   const [view, setView] = useState<ViewType>('feed');
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(() => {
