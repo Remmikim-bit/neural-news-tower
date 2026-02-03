@@ -7,6 +7,10 @@ import {
 import type { NewsArticle, ArticlePerspective } from './types.ts';
 import { ArticleCategory, SortOption } from './types.ts';
 import { MOCK_NEWS, TREND_KEYWORDS } from './data/mockNews.ts';
+import EntityGraphView from './components/EntityGraphView';
+import EventDetail from './components/EventDetail';
+
+type ViewType = 'feed' | 'reader' | 'event' | 'graph';
 
 /**
  * ==============================================================================
@@ -123,8 +127,8 @@ const BiasMeter = ({ score }: { score: number }) => {
       <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-200 via-gray-100 to-red-200 opacity-50"></div>
         <div
-          className={`absolute top-0 bottom-0 w-1 transition-all duration-500 ease-out ${score < 40 ? 'bg-blue-600' : score > 60 ? 'bg-red-600' : 'bg-gray-600'}`}
-          style={{ left: `${score}%` }}
+          className={`absolute top - 0 bottom - 0 w - 1 transition - all duration - 500 ease - out ${score < 40 ? 'bg-blue-600' : score > 60 ? 'bg-red-600' : 'bg-gray-600'} `}
+          style={{ left: `${score}% ` }}
         ></div>
       </div>
       <div className="text-center mt-1 text-xs font-serif font-bold text-gray-700">
@@ -317,8 +321,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onCategorySele
           <nav className="space-y-2">
             <button
               onClick={() => { onCategorySelect(null); onClose(); }}
-              className={`w-full text-left px-4 py-3 rounded font-bold transition-colors ${activeCategory === null ? 'bg-blue-700 text-white' : 'text-gray-700 hover:bg-gray-100'
-                }`}
+              className={`w - full text - left px - 4 py - 3 rounded font - bold transition - colors ${activeCategory === null ? 'bg-blue-700 text-white' : 'text-gray-700 hover:bg-gray-100'
+                } `}
             >
               {TEXT.allCategories}
             </button>
@@ -328,8 +332,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onCategorySele
                 <button
                   key={idx}
                   onClick={() => { onCategorySelect(category); onClose(); }}
-                  className={`w-full text-left px-4 py-3 rounded font-bold transition-colors ${activeCategory === category ? 'bg-blue-700 text-white' : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                  className={`w - full text - left px - 4 py - 3 rounded font - bold transition - colors ${activeCategory === category ? 'bg-blue-700 text-white' : 'text-gray-700 hover:bg-gray-100'
+                    } `}
                 >
                   {item}
                 </button>
@@ -349,11 +353,12 @@ interface HeaderProps {
   onCategorySelect: (category: ArticleCategory | null) => void;
   onLogoClick: () => void;
   onThemeToggle: () => void;
+  onViewGraph: () => void;
   isDarkMode: boolean;
   activeCategory: ArticleCategory | null;
 }
 
-const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategorySelect, onLogoClick, onThemeToggle, isDarkMode, activeCategory }) => (
+const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategorySelect, onLogoClick, onThemeToggle, onViewGraph, isDarkMode, activeCategory }) => (
   <header className="border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 transition-colors duration-300">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center h-16">
@@ -367,7 +372,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategoryS
         </div>
 
         <div className="text-center cursor-pointer group" onClick={onLogoClick}>
-          <h1 className={`text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-blue-800 dark:group-hover:text-blue-400 transition-colors ${CONFIG.theme.fontSerif}`}>
+          <h1 className={`text - 2xl md: text - 3xl font - black tracking - tight text - slate - 900 dark: text - white group - hover: text - blue - 800 dark: group - hover: text - blue - 400 transition - colors ${CONFIG.theme.fontSerif} `}>
             {TEXT.siteTitle}
           </h1>
           <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 dark:text-gray-400 mt-1">{TEXT.siteSubtitle}</p>
@@ -379,6 +384,13 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategoryS
             className="p-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors"
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button
+            onClick={() => onViewGraph()}
+            className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors hidden sm:block"
+            title="Entity Graph"
+          >
+            <Share2 size={20} />
           </button>
           <div className="hidden md:flex gap-2 text-xs font-bold text-gray-500">
             <span className="cursor-pointer hover:text-black">KR</span>
@@ -394,10 +406,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategoryS
       <nav className="max-w-7xl mx-auto px-4 overflow-x-auto scrollbar-hide py-3">
         <div className="flex justify-center md:gap-8 gap-4 min-w-max">
           <span
-            className={`text-[11px] font-black uppercase tracking-widest cursor-pointer transition-all duration-200 py-1 border-b-2 ${activeCategory === null
+            className={`text - [11px] font - black uppercase tracking - widest cursor - pointer transition - all duration - 200 py - 1 border - b - 2 ${activeCategory === null
               ? 'text-blue-700 border-blue-700'
               : 'text-gray-400 border-transparent hover:text-black dark:hover:text-white hover:border-gray-200 dark:hover:border-slate-700'
-              }`}
+              } `}
             onClick={() => onCategorySelect(null)}
           >
             {TEXT.allCategories}
@@ -405,10 +417,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategoryS
           {TEXT.nav.map((item, idx) => (
             <span
               key={idx}
-              className={`text-[11px] font-black uppercase tracking-widest cursor-pointer transition-all duration-200 py-1 border-b-2 ${activeCategory === CATEGORY_MAP[item]
+              className={`text - [11px] font - black uppercase tracking - widest cursor - pointer transition - all duration - 200 py - 1 border - b - 2 ${activeCategory === CATEGORY_MAP[item]
                 ? 'text-blue-700 border-blue-700'
                 : 'text-gray-400 border-transparent hover:text-black dark:hover:text-white hover:border-gray-200 dark:hover:border-slate-700'
-                }`}
+                } `}
               onClick={() => onCategorySelect(CATEGORY_MAP[item])}
             >
               {item}
@@ -476,7 +488,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onBack, isBookma
         <div className="flex gap-3 text-gray-400">
           <button
             onClick={onToggleBookmark}
-            className={`cursor-pointer transition-colors ${isBookmarked ? 'text-blue-600' : 'hover:text-black dark:hover:text-white'}`}
+            className={`cursor - pointer transition - colors ${isBookmarked ? 'text-blue-600' : 'hover:text-black dark:hover:text-white'} `}
             title={TEXT.bookmark}
           >
             <Bookmark size={18} className={isBookmarked ? 'fill-current' : ''} />
@@ -495,7 +507,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onBack, isBookma
         <article className="lg:col-span-8">
           <div className="mb-6">
             <span className="text-blue-700 font-bold text-xs tracking-wider uppercase mb-2 block">{article.category}</span>
-            <h1 className={`text-3xl md:text-4xl font-bold text-slate-900 dark:text-white leading-tight mb-4 ${CONFIG.theme.fontSerif}`}>
+            <h1 className={`text - 3xl md: text - 4xl font - bold text - slate - 900 dark: text - white leading - tight mb - 4 ${CONFIG.theme.fontSerif} `}>
               {article.title}
             </h1>
             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6 pb-6 border-b border-gray-100 dark:border-gray-800">
@@ -517,7 +529,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onBack, isBookma
 
             <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-lg border-l-4 border-slate-900 dark:border-blue-700 mb-8">
               <h3 className="font-bold text-slate-900 dark:text-white mb-2 text-sm uppercase tracking-wide">AI Summary</h3>
-              <p className={`text-gray-700 dark:text-gray-300 leading-relaxed ${CONFIG.theme.fontSerif}`}>{article.summary}</p>
+              <p className={`text - gray - 700 dark: text - gray - 300 leading - relaxed ${CONFIG.theme.fontSerif} `}>{article.summary}</p>
             </div>
 
             <MarkdownViewer content={article.contentMarkdown} />
@@ -585,10 +597,10 @@ const PerspectiveView: React.FC<PerspectiveViewProps> = ({ perspectives }) => {
           <button
             key={idx}
             onClick={() => setActivePerspective(idx)}
-            className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all ${activePerspective === idx
+            className={`flex - shrink - 0 px - 4 py - 2 rounded - full text - sm font - semibold transition - all ${activePerspective === idx
               ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600'
-              }`}
+              } `}
           >
             {p.source}
           </button>
@@ -625,8 +637,8 @@ const PerspectiveView: React.FC<PerspectiveViewProps> = ({ perspectives }) => {
               </div>
               <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-1000 ${perspectives[activePerspective].bias > 60 ? 'bg-red-500' : perspectives[activePerspective].bias < 40 ? 'bg-blue-500' : 'bg-gray-400'}`}
-                  style={{ width: `${perspectives[activePerspective].bias}%` }}
+                  className={`h - full rounded - full transition - all duration - 1000 ${perspectives[activePerspective].bias > 60 ? 'bg-red-500' : perspectives[activePerspective].bias < 40 ? 'bg-blue-500' : 'bg-gray-400'} `}
+                  style={{ width: `${perspectives[activePerspective].bias}% ` }}
                 ></div>
               </div>
             </div>
@@ -647,13 +659,37 @@ interface NewsFeedProps {
   onTrendClick: (keyword: string) => void;
   sortBy: SortOption;
   onSortChange: (sort: SortOption) => void;
+  onSelectEvent: (eventId: string) => void;
+  onViewGraph: () => void;
 }
 
-const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendClick, sortBy, onSortChange }) => {
+const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendClick, sortBy, onSortChange, onSelectEvent, onViewGraph }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* Left Sidebar */}
       <div className="hidden lg:block lg:col-span-3 space-y-6">
+        <div className="bg-blue-700 text-white p-6 rounded-xl shadow-lg mb-6 group cursor-pointer hover:bg-blue-800 transition-all" onClick={() => onSelectEvent('ev-sewol-2014')}>
+          <div className="flex items-center gap-2 mb-2 text-[10px] font-black uppercase tracking-widest">
+            <Clock size={12} /> Featured Event
+          </div>
+          <h3 className="text-lg font-serif font-bold mb-2 group-hover:translate-x-1 transition-transform">세월호 참사 타임라인</h3>
+          <p className="text-xs text-blue-100 mb-4 line-clamp-2">AI가 재구성한 참사의 전 과정과 리비전 형식의 타임라인을 확인하세요.</p>
+          <div className="flex items-center text-[10px] font-bold uppercase">
+            View Timeline <ChevronRight size={10} className="ml-1" />
+          </div>
+        </div>
+
+        <div className="bg-slate-900 text-white p-6 rounded-xl shadow-lg mb-6 group cursor-pointer hover:bg-black transition-all" onClick={onViewGraph}>
+          <div className="flex items-center gap-2 mb-2 text-[10px] font-black uppercase tracking-widest text-blue-400">
+            <Share2 size={12} /> Interactive Graph
+          </div>
+          <h3 className="text-lg font-serif font-bold mb-2 group-hover:translate-x-1 transition-transform">인물 관계 네트워크</h3>
+          <p className="text-xs text-slate-400 mb-4">뉴스 속 인물들과 조직들의 연결 고리를 그래프 뷰로 탐색하세요.</p>
+          <div className="flex items-center text-[10px] font-bold uppercase text-blue-400">
+            Open Graph View <ChevronRight size={10} className="ml-1" />
+          </div>
+        </div>
+
         <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded p-4">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp size={18} className="text-red-600" />
@@ -668,7 +704,7 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
               >
                 <span className="font-bold text-gray-400 w-6">0{item.rank}</span>
                 <span className="flex-1 font-medium text-gray-700 group-hover:text-black dark:text-gray-300 dark:group-hover:text-white">{item.text}</span>
-                <span className={`text-[10px] px-1.5 rounded ${item.change === 'up' ? 'text-red-600 bg-red-50 dark:bg-red-900/30' : item.change === 'down' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/30' : 'text-gray-400 bg-gray-100 dark:bg-slate-700'}`}>
+                <span className={`text - [10px] px - 1.5 rounded ${item.change === 'up' ? 'text-red-600 bg-red-50 dark:bg-red-900/30' : item.change === 'down' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/30' : 'text-gray-400 bg-gray-100 dark:bg-slate-700'} `}>
                   {item.change === 'up' ? '▲' : item.change === 'down' ? '▼' : '-'}
                 </span>
               </li>
@@ -713,7 +749,7 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
             </div>
             <div className="flex flex-col justify-center">
               <span className="text-blue-700 dark:text-blue-400 font-black text-[10px] tracking-widest uppercase mb-3 block">{articles[0].category}</span>
-              <h2 className={`text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-4 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors leading-tight ${CONFIG.theme.fontSerif}`}>
+              <h2 className={`text - 2xl md: text - 4xl font - black text - slate - 900 dark: text - white mb - 4 group - hover: text - blue - 700 dark: group - hover: text - blue - 400 transition - colors leading - tight ${CONFIG.theme.fontSerif} `}>
                 {articles[0].title}
               </h2>
               <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3">
@@ -738,7 +774,7 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
               <div className="flex items-start justify-between mb-4">
                 <span className="text-[9px] font-black bg-gray-100 dark:bg-slate-700/50 px-2 py-1 rounded text-blue-700 dark:text-blue-400 uppercase tracking-widest">{article.category}</span>
               </div>
-              <h3 className={`text-xl font-bold text-slate-900 dark:text-white mb-3 leading-tight group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors ${CONFIG.theme.fontSerif}`}>
+              <h3 className={`text - xl font - bold text - slate - 900 dark: text - white mb - 3 leading - tight group - hover: text - blue - 700 dark: group - hover: text - blue - 400 transition - colors ${CONFIG.theme.fontSerif} `}>
                 {article.title}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 mb-6 flex-1 leading-relaxed">
@@ -763,7 +799,9 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
  */
 
 export default function App() {
+  const [view, setView] = useState<ViewType>('feed');
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
       return document.documentElement.classList.contains('dark') ||
@@ -848,11 +886,12 @@ export default function App() {
 
   const handleTrendClick = (keyword: string) => {
     setSearchQuery(keyword);
+    setView('feed');
     setSelectedArticle(null);
   };
 
   const handleToggleBookmark = (articleId: string) => {
-    setBookmarks(prev => {
+    setBookmarks((prev: Set<string>) => {
       const newBookmarks = new Set(prev);
       if (newBookmarks.has(articleId)) {
         newBookmarks.delete(articleId);
@@ -904,24 +943,46 @@ export default function App() {
         onThemeToggle={toggleDarkMode}
         isDarkMode={isDarkMode}
         activeCategory={activeCategory}
+        onViewGraph={() => setView('graph')}
       />
 
       {/* Main Content */}
       <main>
-        {selectedArticle ? (
+        {view === 'graph' && (
+          <EntityGraphView onBack={() => setView('feed')} />
+        )}
+
+        {view === 'event' && selectedEventId && (
+          <EventDetail
+            eventId={selectedEventId}
+            onBack={() => setView('feed')}
+          />
+        )}
+
+        {view === 'reader' && selectedArticle && (
           <ArticleReader
             article={selectedArticle}
-            onBack={() => setSelectedArticle(null)}
+            onBack={() => setView('feed')}
             isBookmarked={bookmarks.has(selectedArticle.id)}
             onToggleBookmark={() => handleToggleBookmark(selectedArticle.id)}
           />
-        ) : (
+        )}
+
+        {view === 'feed' && (
           <NewsFeed
             articles={filteredArticles}
-            onSelectArticle={setSelectedArticle}
+            onSelectArticle={(art) => {
+              setSelectedArticle(art);
+              setView('reader');
+            }}
             onTrendClick={handleTrendClick}
             sortBy={sortBy}
             onSortChange={setSortBy}
+            onSelectEvent={(eventId: string) => {
+              setSelectedEventId(eventId);
+              setView('event');
+            }}
+            onViewGraph={() => setView('graph')}
           />
         )}
       </main>
@@ -929,7 +990,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-12 py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className={`text-2xl font-bold font-serif mb-4`}>{TEXT.siteTitle}</h2>
+          <h2 className={`text - 2xl font - bold font - serif mb - 4`}>{TEXT.siteTitle}</h2>
           <p className="text-sm text-gray-500 mb-6">
             Providing unbiased intelligence for the modern era.<br />
             Neural News uses advanced AI to analyze political bias in real-time.

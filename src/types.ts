@@ -60,6 +60,10 @@ export interface NewsArticle {
     status?: ArticleStatus;
     featured?: boolean;
     priority?: number; // 0-100
+
+    // 관계성 (New)
+    eventId?: string; // 소속된 사건 ID
+    phaseId?: string; // 소속된 사건의 단계 ID
 }
 
 export interface ArticlePerspective {
@@ -82,6 +86,7 @@ export const ArticleCategory = {
     SPORTS: 'SPORTS',
     HEALTH: 'HEALTH',
     ENVIRONMENT: 'ENVIRONMENT',
+    SOCIETY: 'SOCIETY',
 } as const;
 export type ArticleCategory = (typeof ArticleCategory)[keyof typeof ArticleCategory];
 
@@ -211,7 +216,81 @@ export interface ReadHistoryItem {
 }
 
 // ============================================================================
-// UI State Types
+// Event-Centric Models
+// ============================================================================
+
+export interface NewsEvent {
+    id: string;
+    title: string;
+    description: string;
+    summary: string;
+    imageUrl?: string;
+    category: ArticleCategory;
+    status: 'ONGOING' | 'RESOLVED' | 'HISTORICAL';
+    startDate: string;
+    endDate?: string;
+    phases: EventPhase[];
+    relatedEntities: string[]; // Entity IDs or names
+    tags: string[];
+}
+
+export interface EventPhase {
+    id: string;
+    eventId: string;
+    date: string;
+    title: string;
+    description: string;
+    contentMarkdown: string;
+    relatedArticles: string[]; // Article IDs
+    importance: number; // 1-5
+}
+
+// ============================================================================
+// Entity & Graph Models
+// ============================================================================
+
+export interface Entity {
+    id: string;
+    name: string;
+    type: EntityType;
+    description?: string;
+    imageUrl?: string;
+    frequency: number; // 출연 빈도 (노드 크기 결정)
+    sentiment?: number; // -1 to 1
+    recentArticleIds: string[];
+}
+
+export const EntityType = {
+    PERSON: 'PERSON',
+    ORGANIZATION: 'ORGANIZATION',
+    LOCATION: 'LOCATION',
+    EVENT: 'EVENT',
+    PRODUCT: 'PRODUCT',
+    CONCEPT: 'CONCEPT',
+} as const;
+export type EntityType = (typeof EntityType)[keyof typeof EntityType];
+
+export interface GraphData {
+    nodes: GraphNode[];
+    links: GraphLink[];
+}
+
+export interface GraphNode {
+    id: string;
+    name: string;
+    val: number; // 중요도/노드 크기
+    type: EntityType;
+    color?: string;
+}
+
+export interface GraphLink {
+    source: string; // ID
+    target: string; // ID
+    width: number; // 가중치/선 두께
+}
+
+// ============================================================================
+// UI State Types (Updated)
 // ============================================================================
 
 export interface AppState {
