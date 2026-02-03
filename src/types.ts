@@ -53,10 +53,22 @@ export interface NewsArticle {
     // 상호작용
     stats?: ArticleStats;
 
+    // 언론사별 시각 (Perspective)
+    perspectives?: ArticlePerspective[];
+
     // 시스템
     status?: ArticleStatus;
     featured?: boolean;
     priority?: number; // 0-100
+}
+
+export interface ArticlePerspective {
+    source: string; // 언론사 명 (Hankyoreh, Chosun, etc.)
+    sourceId: string;
+    opinion: string; // 요약된 어조/입장
+    summary: string; // 상세 분석 내용
+    link: string;    // 원문 링크
+    bias: number;    // 해당 언론사의 이 기사에 대한 편향치 (0-100)
 }
 
 export const ArticleCategory = {

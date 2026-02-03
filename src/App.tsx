@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   Menu, Search, X, ChevronRight, Share2, Printer,
   Bookmark, Globe, BarChart2, TrendingUp, Clock, AlertCircle,
-  ArrowDownNarrowWide as SortDesc
+  ArrowDownNarrowWide as SortDesc, Sun, Moon, ExternalLink
 } from 'lucide-react';
-import type { NewsArticle } from './types.ts';
+import type { NewsArticle, ArticlePerspective } from './types.ts';
 import { ArticleCategory, SortOption } from './types.ts';
 import { MOCK_NEWS, TREND_KEYWORDS } from './data/mockNews.ts';
 
@@ -44,7 +44,8 @@ const LABELS = {
     share: "공유",
     print: "인쇄",
     subscribe: "구독하기",
-    subscribeEmail: "이메일 주소",
+    perspectives: "언론사별 시각",
+    linkCopied: "링크가 복사되었습니다",
     joinNow: "가입하기",
     filter: "필터",
     sort: "정렬",
@@ -53,7 +54,6 @@ const LABELS = {
     sortByDate: "최신순",
     sortByPopularity: "인기순",
     bookmarked: "북마크됨",
-    linkCopied: "링크가 복사되었습니다",
   },
   en: {
     siteTitle: "NEURAL NEWS",
@@ -76,6 +76,8 @@ const LABELS = {
     share: "Share",
     print: "Print",
     subscribe: "Subscribe",
+    perspectives: "Perspectives",
+    linkCopied: "Link copied",
     subscribeEmail: "Email address",
     joinNow: "JOIN NOW",
     filter: "Filter",
@@ -85,7 +87,6 @@ const LABELS = {
     sortByDate: "Latest",
     sortByPopularity: "Popular",
     bookmarked: "Bookmarked",
-    linkCopied: "Link copied",
   }
 };
 
@@ -224,21 +225,23 @@ const EntityNetworkBlock = () => {
  */
 
 // Breaking Ticker
-const BreakingTicker = () => {
-  return (
-    <div className="bg-slate-900 text-white text-xs font-bold py-2 px-4 flex items-center overflow-hidden">
-      <span className="text-red-500 mr-4 animate-pulse flex-shrink-0 uppercase tracking-widest">
-        ● {TEXT.tickerLabel}
-      </span>
-      <div className="flex gap-8 animate-marquee whitespace-nowrap font-mono text-gray-300">
-        <span>KOSPI 2,680.50 ▲ 1.2%</span>
-        <span>USD/KRW 1,310.00 ▼ 5.50</span>
-        <span>BREAKING: AI 안전 정상회의 공동 성명 채택</span>
-        <span>WEATHER: 서울 18°C, 맑음</span>
+const BreakingTicker: React.FC<{ items: string[] }> = ({ items }) => (
+  <div className="bg-slate-900 text-white py-2 overflow-hidden border-b border-slate-800 relative">
+    <div className="max-w-7xl mx-auto px-4 flex items-center">
+      <div className="flex-shrink-0 bg-red-600 text-[10px] font-black px-2 py-0.5 rounded mr-4 z-10">
+        BREAKING
+      </div>
+      <div className="flex whitespace-nowrap animate-marquee group">
+        {[...items, ...items].map((item, idx) => (
+          <span key={idx} className="text-xs font-medium tracking-tight mx-8 flex items-center">
+            <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
+            {item}
+          </span>
+        ))}
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 // Search Modal
 interface SearchModalProps {
@@ -345,30 +348,38 @@ interface HeaderProps {
   onSearchClick: () => void;
   onCategorySelect: (category: ArticleCategory | null) => void;
   onLogoClick: () => void;
+  onThemeToggle: () => void;
+  isDarkMode: boolean;
   activeCategory: ArticleCategory | null;
 }
 
-const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategorySelect, onLogoClick, activeCategory }) => (
-  <header className="border-b border-gray-200 bg-white sticky top-0 z-40">
+const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategorySelect, onLogoClick, onThemeToggle, isDarkMode, activeCategory }) => (
+  <header className="border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 transition-colors duration-300">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center h-16">
-        <div className="flex items-center gap-4">
-          <button onClick={onMenuClick} className="text-gray-500 hover:text-black lg:hidden">
-            <Menu size={20} />
+        <div className="flex items-center">
+          <button onClick={onMenuClick} className="p-2 -ml-2 text-gray-400 hover:text-black lg:hidden dark:text-gray-500 dark:hover:text-white transition-colors">
+            <Menu size={24} />
           </button>
-          <button onClick={onSearchClick} className="text-gray-500 hover:text-black">
+          <button onClick={onSearchClick} className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white transition-colors">
             <Search size={20} />
           </button>
         </div>
 
         <div className="text-center cursor-pointer group" onClick={onLogoClick}>
-          <h1 className={`text-2xl md:text-3xl font-black tracking-tight text-slate-900 group-hover:text-blue-800 transition-colors ${CONFIG.theme.fontSerif}`}>
+          <h1 className={`text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-blue-800 dark:group-hover:text-blue-400 transition-colors ${CONFIG.theme.fontSerif}`}>
             {TEXT.siteTitle}
           </h1>
-          <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 mt-1">{TEXT.siteSubtitle}</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 dark:text-gray-400 mt-1">{TEXT.siteSubtitle}</p>
         </div>
 
         <div className="flex items-center gap-4">
+          <button
+            onClick={onThemeToggle}
+            className="p-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors"
+          >
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
           <div className="hidden md:flex gap-2 text-xs font-bold text-gray-500">
             <span className="cursor-pointer hover:text-black">KR</span>
             <span className="w-[1px] bg-gray-300 h-3 self-center"></span>
@@ -380,27 +391,30 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategoryS
         </div>
       </div>
 
-      <nav className="hidden lg:flex justify-center py-3 space-x-8 text-sm font-bold text-gray-600 border-t border-gray-100 mt-2">
-        <button
-          onClick={() => onCategorySelect(null)}
-          className={`hover:text-blue-700 transition-colors border-b-2 pb-1 ${activeCategory === null ? 'border-blue-700 text-blue-700' : 'border-transparent'
-            }`}
-        >
-          {TEXT.allCategories}
-        </button>
-        {TEXT.nav.map((item, idx) => {
-          const category = CATEGORY_MAP[item];
-          return (
-            <button
+      <nav className="max-w-7xl mx-auto px-4 overflow-x-auto scrollbar-hide py-3">
+        <div className="flex justify-center md:gap-8 gap-4 min-w-max">
+          <span
+            className={`text-[11px] font-black uppercase tracking-widest cursor-pointer transition-all duration-200 py-1 border-b-2 ${activeCategory === null
+              ? 'text-blue-700 border-blue-700'
+              : 'text-gray-400 border-transparent hover:text-black dark:hover:text-white hover:border-gray-200 dark:hover:border-slate-700'
+              }`}
+            onClick={() => onCategorySelect(null)}
+          >
+            {TEXT.allCategories}
+          </span>
+          {TEXT.nav.map((item, idx) => (
+            <span
               key={idx}
-              onClick={() => onCategorySelect(category)}
-              className={`hover:text-blue-700 transition-colors border-b-2 pb-1 ${activeCategory === category ? 'border-blue-700 text-blue-700' : 'border-transparent'
+              className={`text-[11px] font-black uppercase tracking-widest cursor-pointer transition-all duration-200 py-1 border-b-2 ${activeCategory === CATEGORY_MAP[item]
+                ? 'text-blue-700 border-blue-700'
+                : 'text-gray-400 border-transparent hover:text-black dark:hover:text-white hover:border-gray-200 dark:hover:border-slate-700'
                 }`}
+              onClick={() => onCategorySelect(CATEGORY_MAP[item])}
             >
               {item}
-            </button>
-          );
-        })}
+            </span>
+          ))}
+        </div>
       </nav>
     </div>
   </header>
@@ -416,6 +430,10 @@ interface ArticleReaderProps {
 
 const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onBack, isBookmarked, onToggleBookmark }) => {
   const [showCopyNotification, setShowCopyNotification] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [article.id]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -442,7 +460,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onBack, isBookma
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 bg-white min-h-screen pb-20">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 bg-white dark:bg-slate-900 min-h-screen pb-20">
       {/* Copy notification */}
       {showCopyNotification && (
         <div className="fixed top-20 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50 animate-in fade-in slide-in-from-top-2">
@@ -451,22 +469,22 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onBack, isBookma
       )}
 
       {/* Sticky Top Bar */}
-      <div className="sticky top-16 z-30 bg-white/95 backdrop-blur border-b border-gray-200 px-4 py-3 flex justify-between items-center">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-blue-700">
+      <div className="sticky top-16 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex justify-between items-center">
+        <button onClick={onBack} className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-500">
           <X size={16} /> {TEXT.backToList}
         </button>
         <div className="flex gap-3 text-gray-400">
           <button
             onClick={onToggleBookmark}
-            className={`cursor-pointer transition-colors ${isBookmarked ? 'text-blue-600' : 'hover:text-black'}`}
+            className={`cursor-pointer transition-colors ${isBookmarked ? 'text-blue-600' : 'hover:text-black dark:hover:text-white'}`}
             title={TEXT.bookmark}
           >
             <Bookmark size={18} className={isBookmarked ? 'fill-current' : ''} />
           </button>
-          <button onClick={handleShare} className="cursor-pointer hover:text-black" title={TEXT.share}>
+          <button onClick={handleShare} className="cursor-pointer hover:text-black dark:hover:text-white" title={TEXT.share}>
             <Share2 size={18} />
           </button>
-          <button onClick={handlePrint} className="cursor-pointer hover:text-black" title={TEXT.print}>
+          <button onClick={handlePrint} className="cursor-pointer hover:text-black dark:hover:text-white" title={TEXT.print}>
             <Printer size={18} />
           </button>
         </div>
@@ -477,15 +495,15 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onBack, isBookma
         <article className="lg:col-span-8">
           <div className="mb-6">
             <span className="text-blue-700 font-bold text-xs tracking-wider uppercase mb-2 block">{article.category}</span>
-            <h1 className={`text-3xl md:text-4xl font-bold text-slate-900 leading-tight mb-4 ${CONFIG.theme.fontSerif}`}>
+            <h1 className={`text-3xl md:text-4xl font-bold text-slate-900 dark:text-white leading-tight mb-4 ${CONFIG.theme.fontSerif}`}>
               {article.title}
             </h1>
-            <div className="flex items-center gap-2 text-sm text-gray-500 mb-6 pb-6 border-b border-gray-100">
-              <span className="font-bold text-gray-900">{article.source}</span>
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6 pb-6 border-b border-gray-100 dark:border-gray-800">
+              <span className="font-bold text-gray-900 dark:text-white">{article.source}</span>
               <span>•</span>
               <Clock size={14} />
               <span>{article.timestamp}</span>
-              <span className="ml-auto flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs font-bold">
+              <span className="ml-auto flex items-center gap-1 text-green-600 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded text-xs font-bold">
                 <AlertCircle size={12} /> {TEXT.sourceCheck}
               </span>
             </div>
@@ -497,48 +515,127 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onBack, isBookma
               </figure>
             )}
 
-            <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-slate-900 mb-8">
-              <h3 className="font-bold text-slate-900 mb-2 text-sm uppercase tracking-wide">AI Summary</h3>
-              <p className={`text-gray-700 leading-relaxed ${CONFIG.theme.fontSerif}`}>{article.summary}</p>
+            <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-lg border-l-4 border-slate-900 dark:border-blue-700 mb-8">
+              <h3 className="font-bold text-slate-900 dark:text-white mb-2 text-sm uppercase tracking-wide">AI Summary</h3>
+              <p className={`text-gray-700 dark:text-gray-300 leading-relaxed ${CONFIG.theme.fontSerif}`}>{article.summary}</p>
             </div>
 
             <MarkdownViewer content={article.contentMarkdown} />
+
+            {article.perspectives && article.perspectives.length > 0 && (
+              <PerspectiveView perspectives={article.perspectives} />
+            )}
           </div>
         </article>
 
         {/* Sidebar */}
         <aside className="lg:col-span-4 space-y-8">
           {/* Bias Analysis */}
-          <div className="bg-white border border-gray-200 rounded p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
               <BarChart2 size={16} className="text-blue-700" />
-              <h3 className="font-bold text-sm text-slate-900 uppercase">{TEXT.biasScore}</h3>
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase">{TEXT.biasScore}</h3>
             </div>
             <BiasMeter score={article.bias} />
-            <p className="text-xs text-gray-500 mt-3 leading-snug">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 leading-snug">
               이 기사는 {article.bias > 60 ? TEXT.biasRight : article.bias < 40 ? TEXT.biasLeft : TEXT.biasCenter} 성향의 어휘를 주로 사용하고 있습니다.
             </p>
           </div>
 
           {/* Geo Map */}
-          <div className="bg-white border border-gray-200 rounded p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
               <Globe size={16} className="text-blue-700" />
-              <h3 className="font-bold text-sm text-slate-900 uppercase">{TEXT.mapLabel}</h3>
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase">{TEXT.mapLabel}</h3>
             </div>
             <WorldMap highlights={article.relatedCountries} />
           </div>
 
           {/* Entity Network */}
-          <div className="bg-white border border-gray-200 rounded p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-100 pb-2">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
               <Share2 size={16} className="text-blue-700" />
-              <h3 className="font-bold text-sm text-slate-900 uppercase">{TEXT.networkLabel}</h3>
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase">{TEXT.networkLabel}</h3>
             </div>
             <EntityNetworkBlock />
           </div>
         </aside>
       </div>
+    </div>
+  );
+};
+
+// Perspective View
+interface PerspectiveViewProps {
+  perspectives: ArticlePerspective[];
+}
+
+const PerspectiveView: React.FC<PerspectiveViewProps> = ({ perspectives }) => {
+  const [activePerspective, setActivePerspective] = useState(0);
+
+  return (
+    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm mt-12 transition-all">
+      <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-700 pb-3">
+        <Globe size={16} className="text-blue-700" />
+        <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase">{TEXT.perspectives}</h3>
+      </div>
+
+      <div className="flex space-x-4 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+        {perspectives.map((p, idx) => (
+          <button
+            key={idx}
+            onClick={() => setActivePerspective(idx)}
+            className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all ${activePerspective === idx
+              ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600'
+              }`}
+          >
+            {p.source}
+          </button>
+        ))}
+      </div>
+
+      {perspectives.length > 0 && (
+        <div className="bg-gray-50 dark:bg-slate-700/50 p-6 rounded-xl border border-gray-100 dark:border-gray-600">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em] mb-1 block">
+                {perspectives[activePerspective].opinion}
+              </span>
+              <h4 className="font-bold text-slate-900 dark:text-white text-xl">{perspectives[activePerspective].source}</h4>
+            </div>
+            <a
+              href={perspectives[activePerspective].link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors shadow-sm"
+              title="원문 보기"
+            >
+              <ExternalLink size={18} />
+            </a>
+          </div>
+          <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6 text-lg">
+            {perspectives[activePerspective].summary}
+          </p>
+          <div className="flex items-center gap-4 py-4 border-t border-gray-200 dark:border-gray-600">
+            <div className="flex-1">
+              <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase mb-2">
+                <span>Objectivity</span>
+                <span>{100 - perspectives[activePerspective].bias}%</span>
+              </div>
+              <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-1000 ${perspectives[activePerspective].bias > 60 ? 'bg-red-500' : perspectives[activePerspective].bias < 40 ? 'bg-blue-500' : 'bg-gray-400'}`}
+                  style={{ width: `${perspectives[activePerspective].bias}%` }}
+                ></div>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-slate-800 px-3 py-1 rounded border border-gray-100 dark:border-gray-600 shadow-sm">
+              <span className="text-[10px] font-black text-slate-500 dark:text-gray-400 uppercase">Bias: {perspectives[activePerspective].bias}%</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -557,21 +654,21 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* Left Sidebar */}
       <div className="hidden lg:block lg:col-span-3 space-y-6">
-        <div className="bg-white border border-gray-200 rounded p-4">
+        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded p-4">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp size={18} className="text-red-600" />
-            <h3 className="font-bold text-slate-900">{TEXT.trendKeyword}</h3>
+            <h3 className="font-bold text-slate-900 dark:text-white">{TEXT.trendKeyword}</h3>
           </div>
           <ul className="space-y-3">
             {TREND_KEYWORDS.map((item, idx) => (
               <li
                 key={idx}
-                className="flex items-center justify-between text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded"
+                className="flex items-center justify-between text-sm group cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 p-1 rounded"
                 onClick={() => onTrendClick(item.text)}
               >
                 <span className="font-bold text-gray-400 w-6">0{item.rank}</span>
-                <span className="flex-1 font-medium text-gray-700 group-hover:text-black">{item.text}</span>
-                <span className={`text-[10px] px-1.5 rounded ${item.change === 'up' ? 'text-red-600 bg-red-50' : item.change === 'down' ? 'text-blue-600 bg-blue-50' : 'text-gray-400 bg-gray-100'}`}>
+                <span className="flex-1 font-medium text-gray-700 group-hover:text-black dark:text-gray-300 dark:group-hover:text-white">{item.text}</span>
+                <span className={`text-[10px] px-1.5 rounded ${item.change === 'up' ? 'text-red-600 bg-red-50 dark:bg-red-900/30' : item.change === 'down' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/30' : 'text-gray-400 bg-gray-100 dark:bg-slate-700'}`}>
                   {item.change === 'up' ? '▲' : item.change === 'down' ? '▼' : '-'}
                 </span>
               </li>
@@ -589,14 +686,14 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
 
       {/* Main Feed */}
       <div className="lg:col-span-9 space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-900 pb-2 mb-4">
-          <h2 className="text-xl font-bold font-serif text-slate-900">Top Stories</h2>
+        <div className="flex items-center justify-between border-b border-slate-900 dark:border-slate-800 pb-2 mb-4">
+          <h2 className="text-xl font-bold font-serif text-slate-900 dark:text-white uppercase tracking-tight">Top Stories</h2>
           <div className="flex items-center gap-2">
             <SortDesc size={16} className="text-gray-500" />
             <select
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value as SortOption)}
-              className="text-xs font-bold text-gray-700 border border-gray-300 rounded px-2 py-1 cursor-pointer hover:border-gray-400"
+              className="text-xs font-bold text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded px-2 py-1 cursor-pointer hover:border-gray-400 transition-colors"
             >
               <option value={SortOption.IMPACT}>{TEXT.sortByImpact}</option>
               <option value={SortOption.DATE}>{TEXT.sortByDate}</option>
@@ -609,48 +706,47 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
         {articles.length > 0 && (
           <div
             onClick={() => onSelectArticle(articles[0])}
-            className="group cursor-pointer grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-white"
+            className="group cursor-pointer grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-gray-200 dark:border-slate-800 hover:shadow-2xl transition-all duration-300"
           >
-            <div className="overflow-hidden rounded border border-gray-200 aspect-video md:aspect-auto">
+            <div className="overflow-hidden rounded-lg aspect-video md:aspect-auto border border-gray-100 dark:border-slate-700/50">
               <img src={articles[0].imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Headline" />
             </div>
             <div className="flex flex-col justify-center">
-              <span className="text-blue-600 font-bold text-xs mb-2 tracking-wide">{articles[0].category}</span>
-              <h2 className={`text-2xl md:text-3xl font-bold text-slate-900 mb-3 group-hover:text-blue-800 transition-colors ${CONFIG.theme.fontSerif}`}>
+              <span className="text-blue-700 dark:text-blue-400 font-black text-[10px] tracking-widest uppercase mb-3 block">{articles[0].category}</span>
+              <h2 className={`text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-4 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors leading-tight ${CONFIG.theme.fontSerif}`}>
                 {articles[0].title}
               </h2>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
+              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3">
                 {articles[0].summary}
               </p>
-              <div className="mt-auto flex items-center text-xs text-gray-400 font-bold">
+              <div className="mt-auto flex items-center text-[10px] text-gray-400 font-bold uppercase tracking-tight">
                 <span>{articles[0].source}</span>
-                <span className="mx-2">•</span>
+                <span className="mx-2 opacity-30">•</span>
                 <span>{articles[0].timestamp}</span>
               </div>
             </div>
           </div>
         )}
 
-        {/* Standard List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {articles.slice(1).map((article) => (
             <div
               key={article.id}
               onClick={() => onSelectArticle(article)}
-              className="group cursor-pointer bg-white border border-gray-200 p-5 rounded hover:shadow-md transition-shadow flex flex-col h-full"
+              className="group cursor-pointer bg-white dark:bg-slate-800/40 border border-gray-200 dark:border-slate-800 p-6 rounded-xl hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300 flex flex-col h-full"
             >
-              <div className="flex items-start justify-between mb-3">
-                <span className="text-[10px] font-bold bg-gray-100 px-2 py-1 rounded text-gray-600">{article.category}</span>
+              <div className="flex items-start justify-between mb-4">
+                <span className="text-[9px] font-black bg-gray-100 dark:bg-slate-700/50 px-2 py-1 rounded text-blue-700 dark:text-blue-400 uppercase tracking-widest">{article.category}</span>
               </div>
-              <h3 className={`text-lg font-bold text-slate-900 mb-2 leading-snug group-hover:text-blue-700 ${CONFIG.theme.fontSerif}`}>
+              <h3 className={`text-xl font-bold text-slate-900 dark:text-white mb-3 leading-tight group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors ${CONFIG.theme.fontSerif}`}>
                 {article.title}
               </h3>
-              <p className="text-sm text-gray-500 line-clamp-3 mb-4 flex-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 mb-6 flex-1 leading-relaxed">
                 {article.summary}
               </p>
-              <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-600">{article.source}</span>
-                <ChevronRight size={16} className="text-gray-400 group-hover:translate-x-1 transition-transform" />
+              <div className="pt-5 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{article.source}</span>
+                <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-700 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
               </div>
             </div>
           ))}
@@ -668,6 +764,25 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
 
 export default function App() {
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark') ||
+        localStorage.getItem('theme') === 'dark';
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<ArticleCategory | null>(null);
@@ -731,11 +846,6 @@ export default function App() {
     return sorted;
   }, [activeCategory, searchQuery, sortBy]);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setSelectedArticle(null);
-  };
-
   const handleTrendClick = (keyword: string) => {
     setSearchQuery(keyword);
     setSelectedArticle(null);
@@ -754,12 +864,15 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-[#f8f9fa] text-slate-900 selection:bg-blue-100 overflow-x-hidden ${CONFIG.theme.fontSans}`}>
+    <div className={`min-h-screen bg-[#f8f9fa] dark:bg-[#0f1115] text-slate-900 dark:text-slate-100 selection:bg-blue-100 dark:selection:bg-blue-900/30 overflow-x-hidden transition-colors duration-300 ${CONFIG.theme.fontSans}`}>
       {/* Modals */}
       <SearchModal
         isOpen={searchModalOpen}
         onClose={() => setSearchModalOpen(false)}
-        onSearch={handleSearch}
+        onSearch={(q) => {
+          setSearchQuery(q);
+          setSearchModalOpen(false);
+        }}
       />
       <MobileMenu
         isOpen={menuOpen}
@@ -769,7 +882,13 @@ export default function App() {
       />
 
       {/* Global Ticker */}
-      <BreakingTicker />
+      <BreakingTicker items={[
+        "KOSPI 2,680.50 ▲ 1.2%",
+        "USD/KRW 1,310.00 ▼ 5.50",
+        "BREAKING: AI 안전 정상회의 공동 성명 채택",
+        "WEATHER: 서울 18°C, 맑음",
+        "TOP STORY: 저출산 대책 예산 40조원 투입 확정"
+      ]} />
 
       {/* Navigation Header */}
       <Header
@@ -782,6 +901,8 @@ export default function App() {
           setSearchQuery('');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+        onThemeToggle={toggleDarkMode}
+        isDarkMode={isDarkMode}
         activeCategory={activeCategory}
       />
 

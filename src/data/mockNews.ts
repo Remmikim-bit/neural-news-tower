@@ -18,6 +18,40 @@ export const MOCK_NEWS: NewsArticle[] = [
         bias: 45,
         timestamp: "2024-03-15T14:30:00Z",
         readingTime: 5,
+        perspectives: [
+            {
+                source: '조선일보',
+                sourceId: 'chosun',
+                opinion: '보수적 실용주의',
+                summary: '정부의 정책 실패와 예산 낭비를 지적하며, 보다 근본적인 규제 완화와 경제적 유인책의 필요성을 강조함.',
+                link: 'https://www.chosun.com/national/2026/02/02/example1',
+                bias: 85
+            },
+            {
+                source: '중앙일보',
+                sourceId: 'joongang',
+                opinion: '중도 보수',
+                summary: '현상 유지의 위험성을 경고하며 사회 구조적 개편과 교육 시스템의 혁신적인 변화가 병행되어야 함을 역설.',
+                link: 'https://www.joongang.co.kr/article/2026/02/02/example2',
+                bias: 65
+            },
+            {
+                source: '한겨레',
+                sourceId: 'hankyoreh',
+                opinion: '진보적 평등주의',
+                summary: '불평등 해소와 주거권 보장이 핵심임을 주장하며, 보편적 복지 확대와 근로 환경의 발본적 개선을 촉구.',
+                link: 'https://www.hani.co.kr/arti/society/example3',
+                bias: 15
+            },
+            {
+                source: '경향신문',
+                sourceId: 'kyunghyang',
+                opinion: '비판적 진보',
+                summary: '자본 중심의 논리를 비판하며 여성의 독자적인 삶의 질 향상과 성평등한 가사 분담 문화 정착이 우선순위임을 강조.',
+                link: 'https://www.khan.co.kr/national/example4',
+                bias: 20
+            }
+        ],
         relatedCountries: ['KR', 'US', 'EU'],
         entities: ['Sam Altman', 'Ministry of Science', 'Samsung'],
         imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop",
@@ -496,6 +530,40 @@ OpenAI 내부 소식통에 따르면, GPT-5는 현재 베타 테스트 단계에
         bias: 68,
         timestamp: "2024-03-09T19:00:00Z",
         readingTime: 5,
+        perspectives: [
+            {
+                source: '조선일보',
+                sourceId: 'chosun',
+                opinion: '보수적 실용주의',
+                summary: '정부의 정책 실패와 예산 낭비를 지적하며, 보다 근본적인 규제 완화와 경제적 유인책의 필요성을 강조함.',
+                link: 'https://www.chosun.com/national/2026/02/02/example1',
+                bias: 85
+            },
+            {
+                source: '중앙일보',
+                sourceId: 'joongang',
+                opinion: '중도 보수',
+                summary: '현상 유지의 위험성을 경고하며 사회 구조적 개편과 교육 시스템의 혁신적인 변화가 병행되어야 함을 역설.',
+                link: 'https://www.joongang.co.kr/article/2026/02/02/example2',
+                bias: 65
+            },
+            {
+                source: '한겨레',
+                sourceId: 'hankyoreh',
+                opinion: '진보적 평등주의',
+                summary: '불평등 해소와 주거권 보장이 핵심임을 주장하며, 보편적 복지 확대와 근로 환경의 발본적 개선을 촉구.',
+                link: 'https://www.hani.co.kr/arti/society/example3',
+                bias: 15
+            },
+            {
+                source: '경향신문',
+                sourceId: 'kyunghyang',
+                opinion: '비판적 진보',
+                summary: '자본 중심의 논리를 비판하며 여성의 독자적인 삶의 질 향상과 성평등한 가사 분담 문화 정착이 우선순위임을 강조.',
+                link: 'https://www.khan.co.kr/national/example4',
+                bias: 20
+            }
+        ],
         relatedCountries: ['KR', 'US'],
         entities: ['Samsung', 'Qualcomm'],
         imageUrl: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=1000&auto=format&fit=crop",
