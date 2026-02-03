@@ -15,7 +15,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => {
     const activePhase = event.phases.find((p: EventPhase) => p.id === selectedPhase) || event.phases[0];
 
     return (
-        <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#0f1115] pb-20">
+        <div className="min-h-screen bg-[#0f1115] pb-20">
             {/* Hero Header */}
             <div className="relative h-[40vh] overflow-hidden">
                 <img

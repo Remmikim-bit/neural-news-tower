@@ -903,7 +903,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-[#f8f9fa] dark:bg-[#0f1115] text-slate-900 dark:text-slate-100 selection:bg-blue-100 dark:selection:bg-blue-900/30 overflow-x-hidden transition-colors duration-300 ${CONFIG.theme.fontSans}`}>
+    <div className={`min-h-screen bg-[#0f1115] text-slate-100 selection:bg-blue-900/30 overflow-x-hidden transition-colors duration-300 ${CONFIG.theme.fontSans}`}>
       {/* Modals */}
       <SearchModal
         isOpen={searchModalOpen}
