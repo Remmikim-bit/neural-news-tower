@@ -59,25 +59,27 @@ export interface NewsArticle {
     priority?: number; // 0-100
 }
 
-export enum ArticleCategory {
-    POLITICS = 'POLITICS',
-    ECONOMY = 'ECONOMY',
-    TECH = 'TECH',
-    WORLD = 'WORLD',
-    OPINION = 'OPINION',
-    SCIENCE = 'SCIENCE',
-    CULTURE = 'CULTURE',
-    SPORTS = 'SPORTS',
-    HEALTH = 'HEALTH',
-    ENVIRONMENT = 'ENVIRONMENT',
-}
+export const ArticleCategory = {
+    POLITICS: 'POLITICS',
+    ECONOMY: 'ECONOMY',
+    TECH: 'TECH',
+    WORLD: 'WORLD',
+    OPINION: 'OPINION',
+    SCIENCE: 'SCIENCE',
+    CULTURE: 'CULTURE',
+    SPORTS: 'SPORTS',
+    HEALTH: 'HEALTH',
+    ENVIRONMENT: 'ENVIRONMENT',
+} as const;
+export type ArticleCategory = (typeof ArticleCategory)[keyof typeof ArticleCategory];
 
-export enum ArticleStatus {
-    DRAFT = 'DRAFT',
-    PUBLISHED = 'PUBLISHED',
-    ARCHIVED = 'ARCHIVED',
-    DELETED = 'DELETED',
-}
+export const ArticleStatus = {
+    DRAFT: 'DRAFT',
+    PUBLISHED: 'PUBLISHED',
+    ARCHIVED: 'ARCHIVED',
+    DELETED: 'DELETED',
+} as const;
+export type ArticleStatus = (typeof ArticleStatus)[keyof typeof ArticleStatus];
 
 // ============================================================================
 // Analysis Types
@@ -119,12 +121,13 @@ export interface MediaAsset {
     };
 }
 
-export enum MediaType {
-    IMAGE = 'IMAGE',
-    VIDEO = 'VIDEO',
-    AUDIO = 'AUDIO',
-    DOCUMENT = 'DOCUMENT',
-}
+export const MediaType = {
+    IMAGE: 'IMAGE',
+    VIDEO: 'VIDEO',
+    AUDIO: 'AUDIO',
+    DOCUMENT: 'DOCUMENT',
+} as const;
+export type MediaType = (typeof MediaType)[keyof typeof MediaType];
 
 // ============================================================================
 // Search & Filter Types
@@ -145,13 +148,14 @@ export interface SearchQuery {
     pageSize: number;
 }
 
-export enum SortOption {
-    RELEVANCE = 'RELEVANCE',
-    DATE = 'DATE',
-    POPULARITY = 'POPULARITY',
-    IMPACT = 'IMPACT',
-    BIAS = 'BIAS',
-}
+export const SortOption = {
+    RELEVANCE: 'RELEVANCE',
+    DATE: 'DATE',
+    POPULARITY: 'POPULARITY',
+    IMPACT: 'IMPACT',
+    BIAS: 'BIAS',
+} as const;
+export type SortOption = (typeof SortOption)[keyof typeof SortOption];
 
 export interface SearchResult {
     articles: NewsArticle[];

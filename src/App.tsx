@@ -344,10 +344,11 @@ interface HeaderProps {
   onMenuClick: () => void;
   onSearchClick: () => void;
   onCategorySelect: (category: ArticleCategory | null) => void;
+  onLogoClick: () => void;
   activeCategory: ArticleCategory | null;
 }
 
-const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategorySelect, activeCategory }) => (
+const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategorySelect, onLogoClick, activeCategory }) => (
   <header className="border-b border-gray-200 bg-white sticky top-0 z-40">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center h-16">
@@ -360,8 +361,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, onCategoryS
           </button>
         </div>
 
-        <div className="text-center">
-          <h1 className={`text-2xl md:text-3xl font-black tracking-tight text-slate-900 ${CONFIG.theme.fontSerif}`}>
+        <div className="text-center cursor-pointer group" onClick={onLogoClick}>
+          <h1 className={`text-2xl md:text-3xl font-black tracking-tight text-slate-900 group-hover:text-blue-800 transition-colors ${CONFIG.theme.fontSerif}`}>
             {TEXT.siteTitle}
           </h1>
           <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 mt-1">{TEXT.siteSubtitle}</p>
@@ -666,7 +667,6 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
  */
 
 export default function App() {
-  console.log('App component initializing...');
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -754,7 +754,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-[#f8f9fa] text-slate-900 ${CONFIG.theme.fontSans}`}>
+    <div className={`min-h-screen bg-[#f8f9fa] text-slate-900 selection:bg-blue-100 overflow-x-hidden ${CONFIG.theme.fontSans}`}>
       {/* Modals */}
       <SearchModal
         isOpen={searchModalOpen}
@@ -776,6 +776,12 @@ export default function App() {
         onMenuClick={() => setMenuOpen(true)}
         onSearchClick={() => setSearchModalOpen(true)}
         onCategorySelect={setActiveCategory}
+        onLogoClick={() => {
+          setSelectedArticle(null);
+          setActiveCategory(null);
+          setSearchQuery('');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
         activeCategory={activeCategory}
       />
 
