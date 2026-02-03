@@ -2,10 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   Menu, Search, X, ChevronRight, Share2, Printer,
   Bookmark, Globe, BarChart2, TrendingUp, Clock, AlertCircle,
-  Filter, SortDesc, BookmarkCheck
+  ArrowDownNarrowWide as SortDesc
 } from 'lucide-react';
-import { NewsArticle, ArticleCategory, TrendKeyword, SortOption } from './types';
-import { MOCK_NEWS, TREND_KEYWORDS, CATEGORY_META } from './data/mockNews';
+import type { NewsArticle } from './types.ts';
+import { ArticleCategory, SortOption } from './types.ts';
+import { MOCK_NEWS, TREND_KEYWORDS } from './data/mockNews.ts';
 
 /**
  * ==============================================================================
@@ -88,7 +89,8 @@ const LABELS = {
   }
 };
 
-const TEXT = LABELS[CONFIG.currentLang as keyof typeof LABELS];
+const TEXT = LABELS[CONFIG.currentLang as keyof typeof LABELS] || LABELS.en;
+
 
 // Category mapping
 const CATEGORY_MAP: Record<string, ArticleCategory> = {
@@ -458,7 +460,7 @@ const ArticleReader: React.FC<ArticleReaderProps> = ({ article, onBack, isBookma
             className={`cursor-pointer transition-colors ${isBookmarked ? 'text-blue-600' : 'hover:text-black'}`}
             title={TEXT.bookmark}
           >
-            {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+            <Bookmark size={18} className={isBookmarked ? 'fill-current' : ''} />
           </button>
           <button onClick={handleShare} className="cursor-pointer hover:text-black" title={TEXT.share}>
             <Share2 size={18} />
@@ -664,6 +666,7 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
  */
 
 export default function App() {
+  console.log('App component initializing...');
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);

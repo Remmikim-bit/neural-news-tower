@@ -4,7 +4,8 @@
  * 개발 및 테스트용 샘플 뉴스 데이터
  */
 
-import { NewsArticle, ArticleCategory, TrendKeyword } from '../types';
+import type { NewsArticle, TrendKeyword } from '../types.ts';
+import { ArticleCategory } from '../types.ts';
 
 export const MOCK_NEWS: NewsArticle[] = [
     {
