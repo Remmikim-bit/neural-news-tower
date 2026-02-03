@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Tailwind v4에서 .dark 클래스를 인식하도록 설정 */
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-bloomberg-bg: #0a0a0a;
   --color-bloomberg-neon: #00f2ff;
@@ -13,12 +16,7 @@
 
 @layer base {
   body {
-    @apply bg-[#f8f9fa] text-slate-900 font-sans antialiased selection:bg-blue-100 transition-colors duration-300;
-  }
-
-  /* Dark mode background override */
-  .dark body {
-    @apply bg-[#0f1115] text-slate-100;
+    @apply bg-[#f8f9fa] text-slate-900 font-sans antialiased selection:bg-blue-100 transition-colors duration-300 dark:bg-[#0f1115] dark:text-slate-100;
   }
 }
 
