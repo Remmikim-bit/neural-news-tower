@@ -1,4 +1,4 @@
-import { ArticleCategory, ArticlePerspective } from './article';
+import { type ArticleCategory, type ArticlePerspective } from './article';
 
 export interface NewsEvent {
     id: string;

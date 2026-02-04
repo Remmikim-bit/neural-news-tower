@@ -1,5 +1,5 @@
-import { ArticleCategory, NewsArticle } from './article';
-import { User } from './user';
+import { type ArticleCategory, type NewsArticle } from './article';
+import type { User } from './user';
 
 export interface SearchQuery {
     q: string;

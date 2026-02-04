@@ -1,4 +1,4 @@
-import { ArticleCategory } from './article';
+import { type ArticleCategory } from './article';
 
 export interface User {
     id: string;
