@@ -2,33 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, Clock, Share2, Bookmark, CheckCircle2, ChevronRight, MessageSquare, BarChart2 } from 'lucide-react';
 import type { EventPhase } from '../types';
 import { mockEvents } from '../data/mockEvents';
-
-const BiasMeter = ({ score, label }: { score: number, label: string }) => {
-    return (
-        <div className="w-full">
-            <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase mb-1 tracking-wider">
-                <span>진보 (Left)</span>
-                <span>중립 (Center)</span>
-                <span>보수 (Right)</span>
-            </div>
-            <div className="relative h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-200 via-gray-100 to-red-200 opacity-50 dark:opacity-20"></div>
-                <div
-                    className={`absolute top-0 bottom-0 w-1 transition-all duration-500 ease-out ${score < 40 ? 'bg-blue-600' : score > 60 ? 'bg-red-600' : 'bg-gray-600'}`}
-                    style={{ left: `${score}%` }}
-                ></div>
-            </div>
-            <div className="flex justify-between items-center mt-2">
-                <span className="text-xs font-serif font-bold text-slate-700 dark:text-slate-300">
-                    Score: {score}
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold">
-                    {label}
-                </span>
-            </div>
-        </div>
-    );
-};
+import { BiasMeter, MarkdownViewer } from './common/Visuals';
 
 interface EventDetailProps {
     eventId: string;
@@ -144,12 +118,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => {
                             </div>
 
                             <div className="prose prose-slate dark:prose-invert max-w-none">
-                                {activePhase.contentMarkdown.split('\n').map((line: string, idx: number) => {
-                                    if (line.startsWith('### ')) return <h3 key={idx} className="text-xl font-bold mt-8 mb-4">{line.replace('### ', '')}</h3>;
-                                    if (line.startsWith('**')) return <p key={idx} className="font-bold my-4">{line.replace(/\*\*/g, '')}</p>;
-                                    if (line.trim().startsWith('- ')) return <li key={idx} className="ml-4 list-disc my-1 text-slate-600 dark:text-gray-400">{line.replace('- ', '')}</li>;
-                                    return <p key={idx} className="text-slate-700 dark:text-gray-300 leading-relaxed text-lg mb-6">{line}</p>;
-                                })}
+                                <MarkdownViewer content={activePhase.contentMarkdown} />
                             </div>
 
                             <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-800">
@@ -219,8 +188,8 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => {
                                     <div className="flex justify-between items-start mb-1">
                                         <span className="font-bold text-xs text-slate-800 dark:text-slate-200">{p.source}</span>
                                         <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${p.bias < 40 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                                                p.bias > 60 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
-                                                    'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                                            p.bias > 60 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                                                'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                                             }`}>{p.opinion}</span>
                                     </div>
                                     <p className="text-xs text-slate-600 dark:text-slate-400 leading-snug">
