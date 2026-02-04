@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import type { NewsArticle, TrendKeyword } from './types.ts';
 import { ArticleCategory, SortOption } from './types.ts';
-import { MOCK_NEWS, TREND_KEYWORDS } from './data/mockNews.ts';
+import { TREND_KEYWORDS } from './data/mockNews.ts';
 import EntityGraphView from './components/EntityGraphView';
 import EventDetail from './components/EventDetail';
 
@@ -608,7 +608,7 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ articles, onSelectArticle, onTrendC
 import { useNews } from './hooks/useNews';
 
 export default function App() {
-  const { articles: liveArticles, loading: articlesLoading } = useNews();
+  const { articles: liveArticles } = useNews();
   const [view, setView] = useState<ViewType>('feed');
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -667,7 +667,7 @@ export default function App() {
 
   // Filter and sort articles
   const filteredArticles = useMemo(() => {
-    let filtered = MOCK_NEWS;
+    let filtered = liveArticles;
 
     // Filter by category
     if (activeCategory) {
@@ -701,7 +701,7 @@ export default function App() {
     }
 
     return sorted;
-  }, [activeCategory, searchQuery, sortBy]);
+  }, [liveArticles, activeCategory, searchQuery, sortBy]);
 
   const handleTrendClick = (keyword: string) => {
     setSearchQuery(keyword);
